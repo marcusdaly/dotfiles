@@ -1,6 +1,6 @@
 # This is Git's per-user configuration file.
 [user]
     name = Marcus Daly
-
 [push]
+    default = current
     autoSetupRemote = true
