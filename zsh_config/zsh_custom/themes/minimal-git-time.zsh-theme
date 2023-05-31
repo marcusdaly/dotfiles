@@ -2,7 +2,20 @@
 
 if [ $UID -eq 0 ]; then NCOLOR="red"; else NCOLOR="white"; fi
 
-PROMPT='%{$fg[$NCOLOR]%}%B%b%{$reset_color%}%{$fg[cyan]%}%B%c%b%{$reset_color%} $(git_prompt_info)%(!.#.$) '
+# extract venv/conda envs
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+function virtualenv_info { 
+    if [ $CONDA_DEFAULT_ENV ]; then
+        if [ $VIRTUAL_ENV ]; then
+            echo %{$fg_no_bold[green]%}'('`basename $CONDA_DEFAULT_ENV`'|'%{$fg_bold[green]%}`basename $VIRTUAL_ENV`%{$fg_no_bold[green]%}') '
+        else
+            echo %{$fg_no_bold[green]%}'('%{$fg_bold[green]%}`basename $CONDA_DEFAULT_ENV`%{$fg_no_bold[green]%}') '
+        fi
+    else
+        echo ''
+    fi
+}
+PROMPT='$(virtualenv_info)%{$fg[$NCOLOR]%}%B%b%{$reset_color%}%{$fg[cyan]%}%B%c%b%{$reset_color%} $(git_prompt_info)%(!.#.$) '
 RPROMPT='[%*]'
 
 # git theming

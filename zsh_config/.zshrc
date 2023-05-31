@@ -21,6 +21,7 @@ ZSH_CUSTOM=~/dotfiles/zsh_config/zsh_custom
 plugins=(
     git
     zsh-syntax-highlighting
+    virtualenv
 )
 
 source $ZSH/oh-my-zsh.sh

@@ -10,3 +10,12 @@ if [[ -f "~/.zshrc" ]] then
     mv ~/.zshrc ~/.zshrc.backup
 fi
 cp ~/dotfiles/zsh_config/top_level_zshrc ~/.zshrc
+
+# set up .condarc file
+if [[ -f "~/.condarc" ]] then
+    mv ~/.condarc ~/.condarc.backup
+fi
+cp ~/dotfiles/.condarc ~/.condarc
+
+# set up conda
+conda init zsh
