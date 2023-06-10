@@ -22,5 +22,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-      - name: Run ShellCheck
+      - name: Run ShellCheck on bash/sh
         uses: azohra/shell-linter@latest
+      - name: Run ShellCheck on zsh
+        uses: azohra/shell-linter@latest
+        with:
+          path: "zsh_config/.zshrc,top_level_zshrc.sh"
