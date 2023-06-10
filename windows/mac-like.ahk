@@ -1,0 +1,11 @@
+﻿#Requires AutoHotkey v2.0
+^left::Send "{home}"
+^right::Send "{end}"
+^+left::Send "+{home}"
+^+right::Send "+{end}"
+^Backspace::Send "+{home}{Backspace}"
+!left::Send "^{left}"
+!right::Send "^{right}"
+!+left::Send "^+{left}"
+!+right::Send "^+{right}"
+!Backspace::Send "^+{left}{Backspace}"
