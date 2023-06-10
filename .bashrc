@@ -1,2 +1,3 @@
+#!/bin/bash
 # base setup
-source ~/dotfiles/shell_setup_base.sh
+source "$HOME"/dotfiles/shell_setup_base.sh

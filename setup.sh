@@ -1,21 +1,21 @@
 #!/bin/bash
 # set up oh-my-zsh plugin
-PLUGIN_NAME=~/dotfiles/zsh_config/zsh_custom/plugins/zsh-syntax-highlighting
-if [[ ! -d "$PLUGIN_NAME" ]] then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $PLUGIN_NAME
+PLUGIN_NAME=$HOME/dotfiles/zsh_config/zsh_custom/plugins/zsh-syntax-highlighting
+if [[ ! -d "$PLUGIN_NAME" ]]; then
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$PLUGIN_NAME"
 fi
 
 # set up .zshrc file
-if [[ -f "~/.zshrc" ]] then
-    mv ~/.zshrc ~/.zshrc.backup
+if [[ -f "$HOME/.zshrc" ]]; then
+    mv "$HOME"/.zshrc "$HOME"/.zshrc.backup
 fi
-cp ~/dotfiles/zsh_config/top_level_zshrc ~/.zshrc
+cp "$HOME"/dotfiles/zsh_config/top_level_zshrc.sh "$HOME"/.zshrc
 
 # set up .condarc file
-if [[ -f "~/.condarc" ]] then
-    mv ~/.condarc ~/.condarc.backup
+if [[ -f "$HOME/.condarc" ]]; then
+    mv "$HOME"/.condarc "$HOME"/.condarc.backup
 fi
-cp ~/dotfiles/.condarc ~/.condarc
+cp "$HOME"/dotfiles/.condarc "$HOME"/.condarc
 
 # set up conda
 conda init zsh

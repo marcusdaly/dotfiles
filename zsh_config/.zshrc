@@ -1,5 +1,6 @@
+#!/bin/zsh
 # base setup
-source ~/dotfiles/shell_setup_base.sh
+source $HOME/dotfiles/shell_setup_base.sh
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -11,7 +12,7 @@ export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="minimal-git-time"
 
 # Would you like to use another custom folder than $ZSH/custom?
-ZSH_CUSTOM=~/dotfiles/zsh_config/zsh_custom
+ZSH_CUSTOM=$HOME/dotfiles/zsh_config/zsh_custom
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
