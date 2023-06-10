@@ -1,5 +1,5 @@
 # base setup
-source ~/dotfiles/shell_setup_base
+source ~/dotfiles/shell_setup_base.sh
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
