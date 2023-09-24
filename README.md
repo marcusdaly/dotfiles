@@ -21,3 +21,8 @@ For github ssh (at least on linux):
 for ip in $(for i in $(seq -f "140.82.%g.%%g" 112 127); do seq -f $i 1 254; done); do ssh-keygen -R $ip; done
 ```
 from https://github.com/orgs/community/discussions/27405
+
+## SSH
+To store keys, make sure ssh-agent running on startup (via a command like `ssh-agent zsh`),
+then add your key (e.g., `ssh-add ~/.ssh/id_....`). This will allow you to automatically
+store your ssh key and not have to enter it all the time!
