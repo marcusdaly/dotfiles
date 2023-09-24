@@ -1,6 +1,8 @@
 # This is Git's per-user configuration file.
 [user]
     name = Marcus Daly
+    # Note: also include a file with 
+    # user.signingkey holding the value of the gpg public ID.
 [init]
     defaultBranch = main
 [push]
