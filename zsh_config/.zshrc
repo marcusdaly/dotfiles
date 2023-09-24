@@ -22,6 +22,7 @@ plugins=(
     git
     zsh-syntax-highlighting
     virtualenv
+    ssh-agent
 )
 
 source $ZSH/oh-my-zsh.sh
