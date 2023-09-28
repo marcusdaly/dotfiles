@@ -23,6 +23,7 @@ plugins=(
     zsh-syntax-highlighting
     virtualenv
     ssh-agent
+    gpg-agent
 )
 
 source $ZSH/oh-my-zsh.sh
