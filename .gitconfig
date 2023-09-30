@@ -14,5 +14,7 @@
     # See here for more on signing commits:
     # https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits
     gpgsign = true
+[gpg]
+    program = gpg2
 [alias]
 	l = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
