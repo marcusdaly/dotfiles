@@ -7,6 +7,12 @@ export GPG_TTY=$(tty)
 export CLICOLOR=1
 export LSCOLORS=ExFxBxDxCxegedabagacad
 
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# aliases
 alias bf="source ~/dotfiles/scripts/black_flake8.sh"
 alias sa="source venv/bin/activate"
 alias python3="python"
