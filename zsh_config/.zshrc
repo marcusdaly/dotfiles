@@ -27,7 +27,6 @@ plugins=(
 )
 
 source $ZSH/oh-my-zsh.sh
-omz update
 
 # zsh-specific setup
 bindkey \^U backward-kill-line
