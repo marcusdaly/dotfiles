@@ -8,3 +8,6 @@
 
 ## Python Environment
 - When configured in the project, please use `uv` for a python environment and dependency management.
+
+## Plan Mode
+- Feel free to enter plan mode whenever you deem appropriate!
