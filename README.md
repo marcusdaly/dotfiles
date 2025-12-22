@@ -13,7 +13,10 @@ chsh -s $(which zsh)
 4. Set up plugin etc. with `source setup.sh`. A backup of any existing `~/.zshrc` will be placed in `~/.zshrc.backup`.
 5. If you do not already have a `~/.gitconfig`, you can set up a basic one that includes
 the `.gitconfig` file in this repo via `source setup_gitconfig.sh`. If you already have
-a `~/.gitconfig`, you can just add an `include` lines like in `top_level_gitconfig`.
+a `~/.gitconfig`, you can just add an `include` line like in `top_level_gitconfig`.
+6. If you do not already have a `~/.claude/CLAUDE.md`, you can set up a basic one that
+includes the `CLAUDE_personal.md` file in this repo via `source setup_claude.sh`. 
+If you already have a `~/.claude/CLAUDE.md`, you can just add an import line like in `claude/CLAUDE_top_level.md`.
 
 
 # Usage

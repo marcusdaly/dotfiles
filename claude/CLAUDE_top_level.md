@@ -1,0 +1,1 @@
+@~/dotfiles/claude/CLAUDE_personal.md
