@@ -1,7 +1,7 @@
 # General Guidance
 ## Style/Linting
 - When fixing linting errors, prefer fixing the root cause of type errors rather than using comments to ignore them, unless there is a strong reason to do otherwise.
-- Avoid single-letter variable names in favor of somewhat human-readable variable names.
+- Please do not use single-letter variable names. Instead, favor using somewhat human-readable variable names.
 
 ## ML Model Pipelines
 - Try to avoid ad-hoc data processing and evaluation. Reproducible scripts and ideally pipelines are much better long term.
