@@ -2,6 +2,8 @@
 ## Style/Linting
 - When fixing linting errors, prefer fixing the root cause of type errors rather than using comments to ignore them, unless there is a strong reason to do otherwise.
 - Please do not use single-letter variable names. Instead, favor using somewhat human-readable variable names.
+- Please make imports at the top of files without strong reasoning otherwise.
+- When making changes to not-yet-deployed branches, please favor a cleaner implementation over backwards compatbility.
 
 ## ML Model Pipelines
 - Try to avoid ad-hoc data processing and evaluation. Reproducible scripts and ideally pipelines are much better long term.
