@@ -6,6 +6,9 @@
 - When making changes to not-yet-deployed branches, please favor a cleaner implementation over backwards compatbility.
 - Favor explicit errors and avoid fallbacks and warnings if something unexpected is observed.
 
+## Best Practices working around Code
+- When adding, updating, or deleting code, please be cognizant that nearby documentation (e.g. READMEs) or deployment files (e.g. Dockerfiles) may reference the code being changed! Make sure to check and update these files accordingly.
+
 ## ML Model Pipelines
 - Try to avoid ad-hoc data processing and evaluation. Reproducible scripts and ideally pipelines are much better long term.
 
