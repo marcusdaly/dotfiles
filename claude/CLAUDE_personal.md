@@ -4,7 +4,7 @@
 - Please do not use single-letter variable names. Instead, favor using somewhat human-readable variable names.
 - Please make imports at the top of files without strong reasoning otherwise.
 - When making changes to not-yet-deployed branches, please favor a cleaner implementation over backwards compatbility.
-- Favor explicit errors rather than warnings & fallbacks if something unexpected is observed.
+- Favor explicit errors and avoid fallbacks and warnings if something unexpected is observed.
 
 ## ML Model Pipelines
 - Try to avoid ad-hoc data processing and evaluation. Reproducible scripts and ideally pipelines are much better long term.
