@@ -10,6 +10,7 @@
 
 ## Best Practices working around Code
 - When adding, updating, or deleting code, please be cognizant that nearby documentation (e.g. READMEs) or deployment files (e.g. Dockerfiles) may reference the code being changed! Make sure to check and update these files accordingly.
+- Before considering a task complete, please run any formatting/type-checking tools present in the repository we're working in. often, this will look like `uv run ruff check` and `uv run pyright`.
 
 ## ML Model Pipelines
 - Try to avoid ad-hoc data processing and evaluation. Reproducible scripts and ideally pipelines are much better long term.
