@@ -7,6 +7,7 @@
 - Favor explicit errors and avoid fallbacks and warnings if something unexpected is observed.
 - Avoid redundant comments. If a section of code is very readable and short, there is no need to have a dedicated comment for each of these sections explaining what the code does.
 - Please only use `assert` statements in tests, instead favoring raising appropriate, informative error types when e.g. an input parameter is of an unexpected value or type.
+- When working with code that enumerates a list of items that code changes may update, please try to keep each item on its own line for cleaner diffs and better readability.
 
 ## Best Practices working around Code
 - When adding, updating, or deleting code, please be cognizant that nearby documentation (e.g. READMEs) or deployment files (e.g. Dockerfiles) may reference the code being changed! Make sure to check and update these files accordingly.
