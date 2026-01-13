@@ -2,9 +2,9 @@
 ## Style/Linting
 - When fixing linting errors, prefer fixing the root cause of type errors rather than using comments to ignore them, unless there is a strong reason to do otherwise.
 - Please do not use single-letter variable names. Instead, favor using somewhat human-readable variable names.
-- Please make imports at the top of files without strong reasoning otherwise.
+- Please keep import statements at the top of files whenever possible.
 - When making changes to not-yet-deployed branches, please favor a cleaner implementation over backwards compatbility.
-- Favor explicit errors and avoid fallbacks and warnings if something unexpected is observed.
+- Please avoid fallbacks and warnings if something unexpected is observed. Instead, raise explicit errors to increase visibility to the issue.
 - Avoid redundant comments. If a section of code is very readable and short, there is no need to have a dedicated comment for each of these sections explaining what the code does.
 - Please only use `assert` statements in tests, instead favoring raising appropriate, informative error types when e.g. an input parameter is of an unexpected value or type.
 - When working with code that enumerates a list of items that code changes may update, please try to keep each item on its own line for cleaner diffs and better readability.
