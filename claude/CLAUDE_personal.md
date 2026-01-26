@@ -13,6 +13,9 @@
 - When adding, updating, or deleting code, please be cognizant that nearby documentation (e.g. READMEs) or deployment files (e.g. Dockerfiles) may reference the code being changed! Make sure to check and update these files accordingly.
 - Before considering a task complete, please run any formatting, linting, type-checking, and testing tools present in the repository we're working in. Often, this will look like `uv run ruff check`, `uv run pyright`, and `uv run pytest`.
 
+## Git - Resolving conflicts and rebasing
+- When merging in chagnes from other branches, please keep in mind that often one branch was originally branched off of the other, but both branches have had changes since then, and the older one in particular often will have rebased on a main branch to pull in fresh changes. Please keep that in mind and maybe use `git rebase --onto` to focus on the relevant commits.
+
 ## ML Model Pipelines
 - Try to avoid ad-hoc data processing and evaluation. Reproducible scripts and ideally pipelines are much better long term.
 
