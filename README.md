@@ -15,9 +15,38 @@ chsh -s $(which zsh)
 the `.gitconfig` file in this repo via `source setup_gitconfig.sh`. If you already have
 a `~/.gitconfig`, you can just add an `include` line like in `top_level_gitconfig`.
 6. If you do not already have a `~/.claude/CLAUDE.md`, you can set up a basic one that
-includes the `CLAUDE_personal.md` file in this repo via `source setup_claude.sh`. 
+includes the `CLAUDE_personal.md` file in this repo via `source setup_claude.sh`.
 If you already have a `~/.claude/CLAUDE.md`, you can just add an import line like in `claude/CLAUDE_top_level.md`.
 
+## Claude Code Skills
+
+This repo includes custom Claude Code skills in `claude/skills/`. The `setup_claude.sh` script
+automatically symlinks these to `~/.claude/skills/`, making them available globally.
+
+Skills can be invoked in two ways:
+
+- **Explicitly** by typing the slash command (e.g., `/rebase-chain`)
+- **Automatically** by Claude when it detects the skill is relevant to your conversation
+
+### Available Skills
+
+- `/rebase-chain` - Help rebase chained feature branches using `git rebase --onto`
+
+### Manual Setup (if not using setup_claude.sh)
+
+If you already have Claude Code configured and just want to add the skills:
+
+```bash
+# If ~/.claude/skills doesn't exist yet:
+ln -s ~/dotfiles/claude/skills ~/.claude/skills
+
+# If it already exists and you want to replace it:
+mv ~/.claude/skills ~/.claude/skills.backup
+ln -s ~/dotfiles/claude/skills ~/.claude/skills
+```
+
+No additional installation is required - Claude Code automatically discovers skills in `~/.claude/skills/`.
+After symlinking, the skills are immediately available.
 
 # Usage
 Add include lines and `source` lines to corresponding base files referencing
