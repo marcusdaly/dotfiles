@@ -31,3 +31,12 @@ jobs:
         with:
           ignore_paths: zsh_config/zsh_custom/plugins
           severity: warning
+
+  gitconfig:
+    name: Validate .gitconfig
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate .gitconfig syntax
+        run: git config --file .gitconfig --list

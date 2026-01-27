@@ -1,3 +1,8 @@
+#!/bin/zsh
+# shellcheck shell=bash
+# shellcheck disable=SC1090  # Can't follow non-constant source
+# shellcheck disable=SC2034  # Variables used by oh-my-zsh
+
 # base setup
 source ~/dotfiles/shell_setup_base
 
