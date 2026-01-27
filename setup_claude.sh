@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2088  # Tildes in echo strings are intentional (display paths to user)
 
 # Ensure ~/.claude directory exists
 mkdir -p ~/.claude

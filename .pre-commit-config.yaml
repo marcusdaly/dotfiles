@@ -1,0 +1,16 @@
+repos:
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.43.0
+    hooks:
+      - id: markdownlint
+        # MD013 = line length rule (default 80 chars). Disabled because documentation
+        # often has long URLs, code examples, and prose that's impractical to wrap.
+        args: ["--disable", "MD013"]
+        exclude: "zsh_config/zsh_custom/plugins/"
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: ["--severity=warning"]
+        exclude: "zsh_config/zsh_custom/plugins/"
