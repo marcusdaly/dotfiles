@@ -1,9 +1,12 @@
 # dotfiles
+
 My base dotfiles.
 
-# Requirements
+## Requirements
+
 If not already, set zsh as your login shell:
-```
+
+```bash
 chsh -s $(which zsh)
 ```
 
@@ -48,16 +51,18 @@ ln -s ~/dotfiles/claude/skills ~/.claude/skills
 No additional installation is required - Claude Code automatically discovers skills in `~/.claude/skills/`.
 After symlinking, the skills are immediately available.
 
-# Usage
+## Usage
+
 Add include lines and `source` lines to corresponding base files referencing
 the files here, along with any more specific files.
 
-For github ssh (at least on linux): 
+For github ssh (at least on linux):
 
-```
+```bash
 for ip in $(for i in $(seq -f "140.82.%g.%%g" 112 127); do seq -f $i 1 254; done); do ssh-keygen -R $ip; done
 ```
-from https://github.com/orgs/community/discussions/27405
+
+From <https://github.com/orgs/community/discussions/27405>
 
 ## SSH
 
