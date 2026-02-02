@@ -22,8 +22,8 @@
 
 ## Git - Resolving conflicts and rebasing
 
-- When merging in changes from other branches, please keep in mind that often one branch was originally branched off of the other, but both branches have had changes since then, and the older one in particular often will have rebased on a main branch to pull in fresh changes. Please keep that in mind and maybe use `git rebase --onto` to focus on the relevant commits.
-- Note that I often work in repos where the norm is to squash and merge into main. This means that the commit history may look much longer on the feature branch than it does on main when trying to rebase on top of main.
+- When merging in changes from other branches, please keep in mind that often one branch was originally branched off of the other, but both branches have had changes since then, and the older one in particular often will have rebased on a main branch to pull in fresh changes. Please keep that in mind and lean towards using the `rebase-chain` skill to handle cases like this.
+- Note that I often work in repos where the norm is to squash and merge into main. This means that the commit history may look much longer on the feature branch than it does on main when trying to rebase on top of main. Again, the `rebase-chain` skill should help here.
 
 ## ML Model Pipelines
 

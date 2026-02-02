@@ -37,10 +37,10 @@ When A's changes have been squashed (common when A = main after a squash-and-mer
 
 After completing each rebase:
 
-1. Resolve any merge conflicts (see below)
-2. Run linting and type checking (e.g., `uv run ruff check`, `uv run pyright`)
-3. Run tests (e.g., `uv run pytest`)
-4. Ensure all checks pass before moving to the next branch in the chain
+1. Resolve any merge conflicts (see below).
+2. Run linting and type checking (e.g., `uv run ruff check`, `uv run pyright`). Please run over any shared code as well as any specific changes made to ensure no unintended breaks were introduced.
+3. Run tests (e.g., `uv run pytest`). Please run over any shared code as well as any specific changes made to ensure no unintended breaks were introduced.
+4. Ensure all checks pass before moving to the next branch in the chain.
 
 Only proceed to rebasing the next branch once the current branch is verified to be functional.
 
