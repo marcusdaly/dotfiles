@@ -88,6 +88,30 @@ If you've already used cherry-pick and have duplicate commits across branches:
 - Maintain linear commit history for easy merging and organization of changes
 - Ensure code remains functional after each rebase
 
+## Safety: Always Create Backup Tags First
+
+Before any rebase operation, create backup tags for all branches in the chain:
+
+```bash
+# Create backup tags for all branches
+git tag backup/branch-A feature/branch-A
+git tag backup/branch-B feature/branch-B
+git tag backup/branch-C feature/branch-C
+# ... for all branches in the chain
+```
+
+If using signed tags (e.g., `tag.gpgsign=true`), you may need:
+
+```bash
+git -c tag.gpgsign=false tag backup/branch-A feature/branch-A
+```
+
+These backups let you:
+
+- Reference original commit ranges with `git merge-base backup/X backup/Y`
+- Rollback if something goes wrong: `git checkout feature/X && git reset --hard backup/X`
+- Compare before/after: `git diff backup/X feature/X`
+
 ## Workflow
 
 For each branch in the chain (starting from the earliest):
@@ -125,3 +149,58 @@ To check if a commit is a duplicate, compare the patch:
 git show <commit-sha> --stat  # See what files changed
 git diff <commit-sha>^..<commit-sha>  # See the actual diff
 ```
+
+## Updating Branch Pointers After Rebase
+
+When using `git rebase --onto` with a backup tag (e.g., `backup/branch-B`), you'll end up in a detached HEAD state. Update the branch pointer:
+
+```bash
+# After: git rebase --onto feature/branch-A <old-base> backup/branch-B
+# You're now in detached HEAD with the rebased commits
+
+# Update the branch to point to the rebased HEAD
+git branch -f feature/branch-B HEAD
+
+# Optionally switch to the branch
+git checkout feature/branch-B
+```
+
+## Fixing Issues in a Branch Chain
+
+When you discover an issue (e.g., failing tests) after rebasing:
+
+1. **Identify which branch introduced the issue** - Don't fix in the final branch if the problem was introduced earlier
+2. **Fix in the correct branch** - Make the fix commit in the branch where the issue was introduced
+3. **Rebase all downstream branches** - Use `rebase --onto` to propagate the fix forward
+
+Example: If tests fail on `feature/C` but the issue was introduced in `feature/A`:
+
+```bash
+# 1. Fix on feature/A
+git checkout feature/A
+# ... make fix ...
+git commit -m "Fix issue"
+
+# 2. Rebase feature/B onto fixed feature/A
+git rebase --onto feature/A <old-base-B> feature/B
+
+# 3. Rebase feature/C onto updated feature/B
+git rebase --onto feature/B <old-base-C> feature/C
+```
+
+This ensures the fix exists at the right point in history and propagates cleanly.
+
+## Batch Rebasing Multiple Downstream Branches
+
+When rebasing a long chain (e.g., 6+ branches), you can batch the `rebase --onto` operations. Git will automatically skip commits that already exist upstream:
+
+```bash
+# For each downstream branch, find old base from backups and rebase
+for branch in grad-norm-logging hyperparam-studies reward-weighted-regression; do
+  OLD_BASE=$(git merge-base backup/$branch backup/<parent-branch>)
+  git rebase --onto feature/<parent-branch> $OLD_BASE backup/$branch
+  git branch -f feature/$branch HEAD
+done
+```
+
+Git will output "dropping ... -- patch contents already upstream" for duplicate commits, which is expected and safe.
