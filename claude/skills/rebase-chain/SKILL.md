@@ -121,10 +121,60 @@ For each branch in the chain (starting from the earliest):
 3. **Resolve any merge conflicts** (see below)
 4. **Run linting and type checking** (e.g., `uv run ruff check`, `uv run pyright`)
 5. **Run tests** (e.g., `uv run pytest`) on shared code and specific changes
-6. **Push the updated branch**: `git push --force-with-lease`
-7. **Proceed to the next branch** in the chain
+6. **Verify the commit count matches expectations**: `git log --oneline <parent>...<branch>` should show only the unique commits
+7. **Push the updated branch**: `git push --force-with-lease`
+8. **Proceed to the next branch** in the chain
 
 Only proceed to rebasing the next branch once the current branch is verified to be functional.
+
+**Red flag**: If the rebase encounters many conflicts, especially on files that shouldn't have conflicts, the old-base is likely wrong. Abort and find a more recent old-base (see "Finding the Correct Old-Base After Squash Merges").
+
+## Finding the Correct Old-Base After Squash Merges
+
+**Critical**: When the parent branch has been squash-merged into main, `git merge-base` often returns the wrong commit. This is the most common cause of rebase conflicts.
+
+### The Problem
+
+Consider this scenario:
+
+- `feature/A` was squash-merged into `main` as commit `abc123`
+- `feature/B` was branched off `feature/A` and has commits `A1, A2, A3, B1, B2`
+- You want to rebase `feature/B` onto `main`
+
+If you run `git merge-base feature/B main`, it returns a commit that's too old (before A1). Using this as old-base means git tries to replay A1, A2, A3 which already exist in main (via the squash), causing conflicts.
+
+### The Solution
+
+**Find the last parent-branch commit in your branch's history, not the merge-base**:
+
+```bash
+# Wrong - returns commit before both A and B diverged from main
+git merge-base feature/B main
+
+# Right - find the last A commit in B's history
+# Look at B's log and identify where A's commits end
+git log --oneline feature/B | head -20
+```
+
+Then use that commit as old-base:
+
+```bash
+# If A3 (hash: def456) is the last A commit in B's history
+git rebase --onto main def456 feature/B
+```
+
+### Quick Identification Method
+
+The unique commits are those AFTER the last commit from the parent branch:
+
+```bash
+# See commits on B that aren't on the updated parent
+git log --oneline <updated-parent>..feature/B
+
+# The old-base should be the commit just BEFORE the first unique commit
+```
+
+If you see commits in this list that belong to the parent branch (already squash-merged), your old-base is wrong - find a more recent old-base.
 
 ## Handling Merge Conflicts
 
