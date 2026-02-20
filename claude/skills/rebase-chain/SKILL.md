@@ -240,10 +240,30 @@ Both sides typically have changes that matter. Instead, always open the conflict
 
 ## Handling Duplicate Commits During Rebase
 
-If `rebase --onto` encounters commits that already exist in the target (with different SHAs but same content), git will show conflicts. You can:
+If `rebase --onto` tries to apply a commit that's already in the target branch (duplicate with different SHA), you'll get conflicts. **IMPORTANT: This usually means your old-base is wrong.**
 
-1. **Skip the duplicate**: `git rebase --skip` if the commit is truly a duplicate
-2. **Resolve manually**: If the duplicate has slight differences, resolve the conflict
+### Preferred approach: Find the correct old-base
+
+If you're hitting duplicate commits during rebase, the old-base is likely incorrect. Rather than using `--skip`:
+
+1. Abort the rebase: `git rebase --abort`
+2. Re-examine the branch to find where duplicates end
+3. Use the LAST duplicate as your old-base
+4. Retry with: `git rebase --onto <new-base> <correct-old-base> <branch>`
+
+Example: If rebasing branch-B and hitting duplicates of parent commits:
+
+```bash
+# Find the last duplicate commit
+git log --oneline backup/branch-B | grep "commit message from parent"
+# Use that SHA as old-base, not git merge-base
+git rebase --onto feature/branch-A <last-duplicate-sha> backup/branch-B
+```
+
+### Fallback options (use sparingly)
+
+1. **Skip the duplicate**: `git rebase --skip` - Only if you're certain it's an exact duplicate
+2. **Resolve manually**: If the duplicate has important differences, merge both sides
 3. **Abort and reassess**: `git rebase --abort` if the situation is too complex
 
 To check if a commit is a duplicate, compare the patch:
