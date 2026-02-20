@@ -129,38 +129,52 @@ Only proceed to rebasing the next branch once the current branch is verified to 
 
 **Red flag**: If the rebase encounters many conflicts, especially on files that shouldn't have conflicts, the old-base is likely wrong. Abort and find a more recent old-base (see "Finding the Correct Old-Base After Squash Merges").
 
-## Finding the Correct Old-Base After Squash Merges
+## Finding the Correct Old-Base
 
-**Critical**: When the parent branch has been squash-merged into main, `git merge-base` often returns the wrong commit. This is the most common cause of rebase conflicts.
+**Critical**: `git merge-base` often returns the wrong commit. This is the most common cause of unexpected rebase conflicts.
 
-### The Problem
+### Why `git merge-base` Lies
 
-Consider this scenario:
+There are two common scenarios where `git merge-base` gives a stale result:
 
-- `feature/A` was squash-merged into `main` as commit `abc123`
-- `feature/B` was branched off `feature/A` and has commits `A1, A2, A3, B1, B2`
-- You want to rebase `feature/B` onto `main`
+1. **Squash merges**: Parent branch was squash-merged into main, so the original commits no longer exist in main's history.
+2. **Accumulated third-party commits**: Long-lived feature branches often pick up commits from other contributors (merged PRs, shared work) that have since been independently merged into main. These commits sit between the branch point and the truly unique work, making `git merge-base` return a point that's far too old.
 
-If you run `git merge-base feature/B main`, it returns a commit that's too old (before A1). Using this as old-base means git tries to replay A1, A2, A3 which already exist in main (via the squash), causing conflicts.
+In both cases, using the stale merge-base as `<old-base>` causes git to replay commits whose changes already exist in the target, producing spurious conflicts.
 
-### The Solution
+### The Solution: Walk the Log to Find Unique Commits
 
-**Find the last parent-branch commit in your branch's history, not the merge-base**:
+Don't trust `git merge-base` blindly. Instead, inspect the branch log and identify where the truly unique commits begin:
 
 ```bash
-# Wrong - returns commit before both A and B diverged from main
-git merge-base feature/B main
+# Step 1: List all commits on the branch that aren't on the parent
+git log --oneline backup/<parent-branch>..backup/<branch>
 
-# Right - find the last A commit in B's history
-# Look at B's log and identify where A's commits end
-git log --oneline feature/B | head -20
+# Step 2: For each commit, check if it's already in main (by message match)
+# Commits from other teams/PRs will have matching messages in main
+for commit in $(git log --reverse --format='%H' backup/<parent-branch>..backup/<branch>); do
+  msg=$(git log --oneline -1 $commit | cut -d' ' -f2-)
+  if git log --oneline main | grep -qF "$msg"; then
+    echo "ALREADY IN MAIN: $(git log --oneline -1 $commit)"
+  else
+    echo "UNIQUE:           $(git log --oneline -1 $commit)"
+  fi
+done
+
+# Step 3: Use the last "ALREADY IN MAIN" commit as your old-base
 ```
 
-Then use that commit as old-base:
+### Using PRs to Validate (But Not Determine) Unique Commits
+
+PR descriptions and titles are useful for understanding the **intent** of a branch — i.e., what work is actually unique to it. However, don't rely on `gh pr view --json commits` to determine which commits to replay. The PR's commit list reflects the raw branch state, which may include accumulated third-party commits, rebased duplicates, or other noise. Use the PR description to sanity-check your findings (e.g., "this PR is about stratified batching, so the unique commits should be the stratified batching ones"), but always determine the old-base from the git log analysis above.
+
+Also look for commits with the same message but different SHAs between the branch and the parent — these are rebased duplicates:
 
 ```bash
-# If A3 (hash: def456) is the last A commit in B's history
-git rebase --onto main def456 feature/B
+# Compare commit messages between branch and parent
+# If both have "Add feature X" with different SHAs, the branch copy is a duplicate
+git log --oneline backup/<parent-branch> | head -20
+git log --oneline backup/<branch> | head -30
 ```
 
 ### Quick Identification Method
@@ -184,6 +198,15 @@ When merge conflicts arise, carefully inspect the changes from both branches:
 - Read and understand the intent of changes from both sides
 - Ensure no crucial changes are lost from either branch
 - When in doubt, ask for clarification rather than guessing
+
+### Never Use Blanket Checkout for Conflicts
+
+**Never** resolve conflicts with `git checkout --ours <file>` or `git checkout --theirs <file>`. These discard one entire side of the conflict, which almost always loses important changes. In a rebase context:
+
+- `--ours` is the new base (parent branch) — discards the commit being replayed
+- `--theirs` is the commit being replayed — discards parent branch changes
+
+Both sides typically have changes that matter. Instead, always open the conflicted file, read the conflict markers, and merge the changes intentionally. For add/add conflicts (both sides added the same file), this is especially important — the two versions may have diverged significantly and need a true merge of both contributions.
 
 ## Handling Duplicate Commits During Rebase
 
