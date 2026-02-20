@@ -177,6 +177,36 @@ git log --oneline backup/<parent-branch> | head -20
 git log --oneline backup/<branch> | head -30
 ```
 
+### Rebased Duplicates Pattern
+
+A particularly tricky scenario occurs when a branch contains its own copies of the parent's commits with different SHAs. This happens when:
+
+1. Branch B was created off branch A
+2. Both were developed independently
+3. A was rebased onto main (changing its SHAs)
+4. B still has the old copies of A's commits
+
+Example detection:
+
+```bash
+# Check if branch has duplicate copies of parent commits
+echo "On branch:"
+git log --oneline backup/<branch> | grep "specific commit message"
+echo "On parent:"
+git log --oneline backup/<parent> | grep "same commit message"
+
+# If you see the same messages with different SHAs, the branch has duplicates
+# The old-base should be AFTER the last duplicate, not at the common ancestor
+```
+
+When you find this pattern:
+
+1. Identify where the duplicate copies end in the branch
+2. Use the last duplicate as your old-base, not `git merge-base`
+3. This ensures you only replay the truly unique commits
+
+**Never use cherry-pick to "fix" this** — it breaks linear history. Always use `rebase --onto` with the correct old-base.
+
 ### Quick Identification Method
 
 The unique commits are those AFTER the last commit from the parent branch:
