@@ -11,6 +11,10 @@
 - Please only use `assert` statements in tests, instead favoring raising appropriate, informative error types when e.g. an input parameter is of an unexpected value or type.
 - When working with code that enumerates a list of items that code changes may update, please try to keep each item on its own line for cleaner diffs and better readability.
 
+## Progress Reporting
+
+- For long-running operations that have a notion of intermediate progress (e.g. processing data in batches, iterating over files, training epochs), use `tqdm` progress bars to provide visibility into progress.
+
 ## Best Practices working around Code
 
 - When adding, updating, or deleting code, please be cognizant that nearby documentation (e.g. READMEs) or deployment files (e.g. Dockerfiles) may reference the code being changed! Make sure to check and update these files accordingly.
