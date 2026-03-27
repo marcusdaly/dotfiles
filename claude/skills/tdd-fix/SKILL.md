@@ -22,25 +22,50 @@ Gather enough context to understand the bug being fixed:
 
 Before writing any code, present a plan to the user for approval. The plan should include:
 
-- **Regression test**: Describe the test that will be written — what it asserts, where it will live, and why it reproduces the bug
-- **Fix approach**: Outline the intended approach to fixing the bug — which files/functions will change and how
+- **Preparatory refactor** (if needed): Identify any pure, behavior-preserving
+  refactors needed to make the buggy code path testable in isolation (e.g.,
+  extracting inline logic into a named function). These must not change behavior.
+- **Regression test**: Describe the test that will be written — what it asserts,
+  where it will live, and why it reproduces the bug
+- **Fix approach**: Outline the intended approach to fixing the bug — which
+  files/functions will change and how
 
 Wait for the user to approve the plan before proceeding.
 
-### 3. Write the Regression Test
+### 3. Preparatory Refactor (if needed)
+
+Before writing tests, check whether the buggy code path can be exercised
+directly from a test. If not, perform **pure refactors** first — small
+structural changes that preserve existing behavior — to expose the buggy
+logic as a testable unit. Examples:
+
+- Extract an inline code block into a named function
+- Make a private method package-visible for testing
+- Split a monolithic function so the relevant logic is isolated
+
+**Critical**: These refactors must be behavior-preserving. Run existing tests
+after each refactor to confirm nothing changed. The goal is to make the buggy
+behavior *testable*, not to fix it yet.
+
+### 4. Write the Regression Test
 
 Write a test that:
 
-- Reproduces the bug by exercising the failing behavior
+- Reproduces the bug by exercising the **existing** (buggy) behavior
 - Uses the repository's existing testing framework and conventions
-- Asserts the **expected** (correct) behavior, so that it **fails** under the current broken implementation
+- Asserts the **expected** (correct) behavior, so that it **fails** under the
+  current broken implementation
 - Is focused and minimal — tests exactly the bug, not more
+- **Fails because of the actual bug**, not because of missing imports,
+  unimplemented functions, or other incidental issues. If the test fails for
+  the wrong reason, the preparatory refactor (step 3) was insufficient — go
+  back and restructure further.
 
 Run the test and confirm it fails. If it does not fail, the test is not correctly reproducing the bug — revisit before moving on.
 
 **Important**: Once the regression test is written and confirmed to fail, do not edit it again. The test is the specification for the fix. If the test needs changes, that means the plan was wrong — go back to step 2.
 
-### 4. Implement the Fix
+### 5. Implement the Fix
 
 With the failing test locked in:
 
@@ -49,7 +74,7 @@ With the failing test locked in:
 3. If the test still fails, iterate on the fix (not the test)
 4. Once the regression test passes, run the full test suite to check for regressions
 
-### 5. Verify
+### 6. Verify
 
 After the fix passes the regression test:
 
