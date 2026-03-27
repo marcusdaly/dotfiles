@@ -38,6 +38,10 @@ When working with code that enumerates a list of items that code changes may upd
 
 For long-running operations that have a notion of intermediate progress (e.g. processing data in batches, iterating over files, training epochs), use `tqdm` progress bars to provide visibility into progress.
 
+## Bug Fixing
+
+- When fixing bugs, use the `tdd-fix` skill to follow a test-driven development approach: write a failing regression test first, then implement the fix.
+
 ## Best Practices working around Code
 
 - When adding, updating, or deleting code, please be cognizant that nearby documentation (e.g. READMEs) or deployment files (e.g. Dockerfiles) may reference the code being changed! Make sure to check and update these files accordingly.
