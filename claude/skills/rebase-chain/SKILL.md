@@ -288,6 +288,62 @@ git branch -f feature/branch-B HEAD
 git checkout feature/branch-B
 ```
 
+## Worktree Safety When Updating Branch Pointers
+
+When `git branch -f` fails because a branch is checked out in another worktree,
+you must handle the worktree carefully to avoid disrupting in-progress work.
+
+### Before touching another worktree
+
+1. **List worktrees**: `git worktree list` to see which branches are checked out
+   where.
+2. **Ask the user for confirmation** before modifying any worktree other than
+   the current one. Other worktrees may have running jobs (training, tests,
+   servers) that depend on the current branch state.
+
+### Updating a branch used by another worktree
+
+When the user approves, follow this sequence to ensure the worktree ends up
+back on its original branch:
+
+```bash
+# 1. Record the original branch
+ORIGINAL_BRANCH=$(git -C /path/to/worktree rev-parse --abbrev-ref HEAD)
+
+# 2. Check for uncommitted changes
+git -C /path/to/worktree status --short
+
+# 3. Detach, update, re-attach — all in one sequence
+git -C /path/to/worktree checkout --detach \
+  && git branch -f <branch-name> <new-sha> \
+  && git -C /path/to/worktree checkout <branch-name>
+```
+
+**Critical rules:**
+
+- **Always restore the worktree to its original branch** after updating. Never
+  leave a worktree on detached HEAD.
+- **If the worktree has uncommitted changes**, stash before detaching and pop
+  after re-attaching:
+
+  ```bash
+  git -C /path/to/worktree stash
+  git -C /path/to/worktree checkout --detach
+  git branch -f <branch-name> <new-sha>
+  git -C /path/to/worktree checkout <branch-name>
+  git -C /path/to/worktree stash pop
+  ```
+
+- **Never change directories (`cd`) into another worktree** without returning
+  to the original — the CWD reset on tool boundaries can cause confusion.
+  Prefer `git -C <path>` instead.
+- **If something goes wrong**, the backup tags allow recovery:
+
+  ```bash
+  git branch -f <branch-name> backup/<branch-name>
+  git -C /path/to/worktree checkout <branch-name>
+  ```
+
 ## Fixing Issues in a Branch Chain
 
 When you discover an issue (e.g., failing tests) after rebasing:

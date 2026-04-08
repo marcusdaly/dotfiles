@@ -45,7 +45,9 @@ For each comment, determine its status:
 **Unaddressed — needs action:**
 
 - Comments requesting changes that haven't been implemented yet
-- Read the current code at the commented location to check if the issue still exists
+- Read the current code **on the PR's head branch** (not just the local worktree, which
+  may be a different branch) to check if the issue still exists:
+  `git show origin/<head-branch>:<file> | sed -n '<line-range>p'`
 
 **Fixed downstream:**
 
@@ -57,7 +59,16 @@ For each comment, determine its status:
 
 **Already addressed:**
 
-- The current code already reflects the requested change
+- The current code on the PR's head branch already reflects the requested change
+- When confirming a fix, identify **which branch and commit** introduced it:
+  1. Use `git log --all --oneline -S "<relevant code>" -- <file>` to find commits that touched the flagged code
+  2. Use `git branch -a --contains <commit>` to determine which branch introduced it
+  3. If the fix is a later commit within the same PR, note "fixed later in this PR (commit `<short-sha>`: `<subject>`)"
+  4. If the fix originates from the base branch (upstream), verify the current branch
+     doesn't *undo* it — diff the flagged region between the base branch tip and the
+     PR head branch. If the fix is preserved, note "fixed upstream in `<branch>`, still
+     present on head". If the current branch reverts or conflicts with the fix, treat
+     it as **unaddressed**.
 
 **Thread context matters:** When a comment has replies, read the full thread to understand
 the resolution. A human may have acknowledged a bot suggestion, disagreed with a reviewer,

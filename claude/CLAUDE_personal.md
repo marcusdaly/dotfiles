@@ -70,6 +70,19 @@ When pushing multiple rebased branches, NEVER use shell variables across separat
 - **Push each branch individually** with explicit SHAs rather than batching multiple branches in one push command.
 - **Verify after pushing** that all remote branches exist and have the correct SHAs.
 
+### Worktree safety
+
+When rebasing branches that are checked out in other worktrees:
+
+- **Always ask the user before modifying other worktrees.** Other worktrees may
+  have active jobs (training, tests) that depend on the current branch.
+- **Never leave a worktree on detached HEAD.** After updating a branch pointer
+  with `git branch -f`, always restore the worktree to its original branch.
+- **Prefer `git -C <path>`** over `cd`-ing into other worktrees to avoid CWD
+  confusion across tool calls.
+- **Check for uncommitted changes** (`git -C <path> status --short`) before
+  detaching. Stash if needed, and pop after re-attaching.
+
 ## ML Model Pipelines
 
 - Try to avoid ad-hoc data processing and evaluation. Reproducible scripts and ideally pipelines are much better long term.
