@@ -1,5 +1,14 @@
 # General Guidance
 
+## Secrets and API Tokens
+
+- **Never read, cat, or display the contents of `~/.secrets.env` or any secrets file.**
+  Always reference tokens via environment variables (e.g., `$BUILDKITE_API_TOKEN`)
+  to keep them out of conversation history.
+- When a command needs a token from `~/.secrets.env`, prefix it with
+  `eval "$(cat ~/.secrets.env)" &&` since each Bash tool call starts a fresh
+  shell that doesn't inherit exports from `source`.
+
 ## Style/Linting
 
 ### Import Statements
