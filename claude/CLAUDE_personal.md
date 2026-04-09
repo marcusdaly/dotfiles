@@ -100,6 +100,27 @@ When rebasing branches that are checked out in other worktrees:
 
 - When configured in the project, please use `uv` for a python environment and dependency management.
 
+## GitHub PRs
+
+Use the `ghpr` shell function (sourced from `~/dotfiles/scripts/ghpr.sh`) for
+common PR operations. Since it may not be loaded in the current shell session,
+source it before use:
+
+```bash
+source ~/dotfiles/scripts/ghpr.sh && ghpr comments <PR_NUMBER>
+```
+
+Available commands:
+
+- `ghpr comments <pr>` — Show all comments (inline review, review summaries, general)
+- `ghpr diff <pr>` — Show the PR diff
+- `ghpr files <pr>` — List changed files
+- `ghpr info <pr>` — Show PR title, state, base branch, and description
+- `ghpr checks <pr>` — Show CI check status
+
+Use `ghpr comments` when addressing PR review feedback, and `ghpr info` to
+understand a PR's purpose before making changes.
+
 ## Shell Commands
 
 - When parsing JSON output from CLI tools (e.g. `curl` to REST APIs), prefer `jq` over inline `python3 -c` one-liners. `jq` is more concise and readable for simple field extraction and filtering.
