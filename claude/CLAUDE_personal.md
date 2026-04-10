@@ -75,6 +75,15 @@ Please only suggest a one-off script if we would *not* have to write a similar s
 - When resolving merge/rebase conflicts, never use blanket `git checkout --ours` or `git checkout --theirs` on entire files. Both sides almost always have changes that need to be preserved. Always inspect conflict markers and merge intentionally.
 - Before running `git stash`, ALWAYS first run `git status` and `git diff --stat` to check what would be stashed. Never blindly stash — in-progress work can be lost or forgotten. If the stash contains meaningful changes, confirm with the user before proceeding.
 
+### Rebase verification
+
+After every `rebase --onto`, verify the result BEFORE pushing:
+
+- Check commit count: `git log --oneline <parent>..<branch> | wc -l`
+- Check content diff: `git diff <parent>..<branch> --stat`
+- If a branch looks identical to its parent after rebase, the unique commits
+  were silently dropped. Recover from backup tags immediately.
+
 ### Pushing rebased branch chains
 
 When pushing multiple rebased branches, NEVER use shell variables across separate commands or subshells. Variables are lost between tool calls and when changing directories. Instead:
