@@ -61,6 +61,12 @@ For long-running operations that have a notion of intermediate progress (e.g. pr
 Please build reproducible solutions rather than one-off scripts or any other "fast" solution as a shortcut, unless I *explicitly* request otherwise.
 Please only suggest a one-off script if we would *not* have to write a similar script again to accomplish the same task at a later date.
 
+## Git - Commits
+
+- **Never amend commits.** Always create new commits instead. This preserves history,
+  avoids force-push issues, and makes it easier to review incremental changes. Repos
+  that squash-merge will collapse the history anyway.
+
 ## Git - Resolving conflicts and rebasing
 
 - Please refer to the `rebase-chain` skill whenever performing rebases.
@@ -125,6 +131,21 @@ understand a PR's purpose before making changes.
 
 - When parsing JSON output from CLI tools (e.g. `curl` to REST APIs), prefer `jq` over inline `python3 -c` one-liners. `jq` is more concise and readable for simple field extraction and filtering.
 - When running long-running commands in the background, do not pipe through `tail` or `head` — the full output is written to a file anyway, and truncating it can cut off valuable information (e.g. job IDs, error messages, cluster URLs).
+
+## Comet ML
+
+Monitor training experiments from the terminal using the `comet` alias:
+
+```bash
+comet list <project>                    # List recent experiments with loss
+comet metrics <experiment_key>          # Latest metrics
+comet text <experiment_key>             # Qualitative generations
+comet compare <key1> <key2> [metric]    # Compare experiments
+comet url <experiment_key>              # Print experiment URL
+```
+
+The `comet` alias loads API key from `~/.secrets.env` and runs via uv.
+Requires `COMET_API_KEY` and `COMET_WORKSPACE` env vars in `~/.secrets.env`.
 
 ## Plan Mode
 
