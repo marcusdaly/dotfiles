@@ -117,12 +117,11 @@ When rebasing branches that are checked out in other worktrees:
 
 ## GitHub PRs
 
-Use the `ghpr` shell function (sourced from `~/dotfiles/scripts/ghpr.sh`) for
-common PR operations. Since it may not be loaded in the current shell session,
-source it before use:
+Use the `ghpr` shell function for common PR operations. It is loaded into the
+shell profile automatically — call it directly without sourcing:
 
 ```bash
-source ~/dotfiles/scripts/ghpr.sh && ghpr comments <PR_NUMBER>
+ghpr comments <PR_NUMBER>
 ```
 
 Available commands:
