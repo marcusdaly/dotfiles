@@ -7,6 +7,7 @@ over the `comet_check.api` library in `~/dotfiles/scripts/comet/`.
 
 | Tool | Purpose |
 | ---- | ------- |
+| `comet_projects` | List project names in a workspace (useful for discovery) |
 | `comet_list` | Recent experiments in a project (with latest train_loss) |
 | `comet_metrics` | Latest value for each requested metric |
 | `comet_compare` | Side-by-side metric comparison of two experiments |

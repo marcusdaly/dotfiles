@@ -151,6 +151,7 @@ understand a PR's purpose before making changes.
 (registered via `~/dotfiles/setup_mcp.sh`). They return structured data
 that's easier to reason about than parsed shell output:
 
+- `comet_projects(workspace?)` — list project names (discovery)
 - `comet_list(project, workspace?, limit?)` — recent experiments with loss
 - `comet_metrics(experiment_key, metric_names?)` — latest values per metric
 - `comet_compare(key1, key2, metric?)` — side-by-side metric comparison

@@ -13,6 +13,16 @@ mcp = FastMCP("comet")
 
 
 @mcp.tool()
+def comet_projects(workspace: str | None = None) -> list[str]:
+    """List project names in a Comet workspace.
+
+    Args:
+        workspace: Optional workspace; defaults to $COMET_WORKSPACE.
+    """
+    return api.list_projects(workspace=workspace)
+
+
+@mcp.tool()
 def comet_list(
     project: str,
     workspace: str | None = None,

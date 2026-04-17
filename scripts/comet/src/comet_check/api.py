@@ -32,6 +32,17 @@ def _resolve_workspace(workspace: str | None) -> str:
     return effective
 
 
+def list_projects(workspace: str | None = None) -> list[str]:
+    """Return project names in a workspace.
+
+    Args:
+        workspace: Optional workspace; defaults to $COMET_WORKSPACE.
+    """
+    api = _api()
+    effective_workspace = _resolve_workspace(workspace)
+    return api.get_projects(effective_workspace)
+
+
 def list_experiments(
     project: str,
     workspace: str | None = None,
