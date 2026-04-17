@@ -35,3 +35,6 @@ source $ZSH/oh-my-zsh.sh
 
 # zsh-specific setup
 bindkey \^U backward-kill-line
+
+# CLI tools (load secrets and run via uv)
+alias comet='eval "$(cat ~/.secrets.env)" && uv run --project ~/dotfiles/scripts/comet comet-check'
