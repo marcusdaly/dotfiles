@@ -5,9 +5,8 @@
 - **Never read, cat, or display the contents of `~/.secrets.env` or any secrets file.**
   Always reference tokens via environment variables (e.g., `$BUILDKITE_API_TOKEN`)
   to keep them out of conversation history.
-- When a command needs a token from `~/.secrets.env`, prefix it with
-  `eval "$(cat ~/.secrets.env)" &&` since each Bash tool call starts a fresh
-  shell that doesn't inherit exports from `source`.
+- Tokens from `~/.secrets.env` are already available as environment variables
+  in every shell session (loaded via the shell profile).
 
 ## Style/Linting
 
@@ -117,8 +116,13 @@ When rebasing branches that are checked out in other worktrees:
 
 ## GitHub PRs
 
-Use the `ghpr` shell function for common PR operations. It is loaded into the
-shell profile automatically — call it directly without sourcing:
+**Always prefer `ghpr` over raw `gh api` calls** for PR operations. `ghpr`
+handles authentication and formatting automatically, avoiding permissions
+issues that `gh api` can encounter. Only fall back to `gh api` when you need
+data that `ghpr` doesn't expose (e.g., specific API fields, programmatic JSON
+parsing).
+
+`ghpr` is loaded into the shell profile automatically — call it directly:
 
 ```bash
 ghpr comments <PR_NUMBER>

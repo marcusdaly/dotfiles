@@ -26,17 +26,16 @@ gh pr view <number> --json number,title,headRefName,baseRefName,state
 
 ### 2. Gather Review Comments
 
-Fetch all review comments from the PR:
+Fetch all review comments from the PR using `ghpr` (preferred over `gh api`
+for reliability and auth handling):
 
 ```bash
-# Inline review comments (on specific lines)
-gh api repos/{owner}/{repo}/pulls/{number}/comments \
-  --jq '.[] | {path: .path, line: (.line // .original_line), author: .user.login, body: .body, id: .id}'
-
-# Issue-level comments (general discussion)
-gh api repos/{owner}/{repo}/issues/{number}/comments \
-  --jq '.[] | {author: .user.login, body: .body, id: .id}'
+# All comments: inline review, review summaries, and general discussion
+ghpr comments <number>
 ```
+
+Only fall back to `gh api` if you need structured JSON output for programmatic
+processing that `ghpr` doesn't support.
 
 ### 3. Categorize Comments
 
@@ -74,6 +73,14 @@ For each comment, determine its status:
 the resolution. A human may have acknowledged a bot suggestion, disagreed with a reviewer,
 or proposed an alternative approach. Use the full thread context — not just the original
 comment — to determine the appropriate action.
+
+**Verify uncertain deferrals:** When a user reply expresses uncertainty about whether an
+issue is fixed elsewhere (e.g., "I think we may fix this in a subsequent PR", "this might
+be handled downstream"), do NOT assume it's fixed. Always verify by diffing the relevant
+file across all downstream branches in the chain. If no downstream branch modifies the
+flagged code region, classify the comment as **unaddressed** and propose a fix. Only
+classify as "fixed downstream" when you can point to a specific branch and diff that
+addresses the issue.
 
 ### 4. Present Summary
 

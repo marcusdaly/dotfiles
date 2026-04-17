@@ -121,13 +121,15 @@ For each branch in the chain (starting from the earliest):
 3. **Resolve any merge conflicts** (see below)
 4. **Run linting and type checking** (e.g., `uv run ruff check`, `uv run pyright`)
 5. **Run tests** (e.g., `uv run pytest`) on shared code and specific changes
-6. **Verify the commit count matches expectations**: `git log --oneline <parent>...<branch>` should show only the unique commits
+6. **Verify the rebase preserved all unique content** (see "Post-Rebase Verification Checklist" below). **Do NOT push until verification passes.**
 7. **Push the updated branch**: `git push --force-with-lease`
 8. **Proceed to the next branch** in the chain
 
 Only proceed to rebasing the next branch once the current branch is verified to be functional.
 
-**Red flag**: If the rebase encounters many conflicts, especially on files that shouldn't have conflicts, the old-base is likely wrong. Abort and find a more recent old-base (see "Finding the Correct Old-Base After Squash Merges").
+**Red flag (conflicts)**: If the rebase encounters many conflicts, especially on files that shouldn't have conflicts, the old-base is likely wrong. Abort and find a more recent old-base (see "Finding the Correct Old-Base After Squash Merges").
+
+**Red flag (silent drops)**: If the rebase completes with no conflicts but drops most/all commits ("dropping ... patch contents already upstream"), the old-base is wrong. The branch's unique commits were silently lost. Abort immediately and recover from backup tags.
 
 ## Finding the Correct Old-Base
 
@@ -237,6 +239,26 @@ When merge conflicts arise, carefully inspect the changes from both branches:
 - `--theirs` is the commit being replayed — discards parent branch changes
 
 Both sides typically have changes that matter. Instead, always open the conflicted file, read the conflict markers, and merge the changes intentionally. For add/add conflicts (both sides added the same file), this is especially important — the two versions may have diverged significantly and need a true merge of both contributions.
+
+### Always Resolve Conflicts with Direct Edits
+
+**Never** use regex-based or programmatic conflict resolution (e.g., `re.sub` to strip
+conflict markers, `sed` to remove `<<<<<<`/`>>>>>>>`). These approaches:
+
+- Hide what's actually being changed, making review impossible
+- Can silently corrupt content if the regex pattern matches unintended text
+- Skip the critical step of verifying each conflict's resolution
+
+Instead, **always use the Edit tool** (or manual editing) to resolve each conflict
+individually. For each conflict region:
+
+1. Read the `<<<<<<< HEAD` (ours) and `>>>>>>> <hash>` (theirs) sections
+2. Determine which content to keep (may be one side, both, or a merge)
+3. Make a single Edit replacing the entire conflict block with the resolved content
+4. Verify no stray markers remain with `grep`
+
+Even when many conflicts follow the same pattern (e.g., "HEAD always wins"), resolve
+each one explicitly so the edit is visible and reviewable.
 
 ## Handling Duplicate Commits During Rebase
 
@@ -383,3 +405,25 @@ done
 ```
 
 Git will output "dropping ... -- patch contents already upstream" for duplicate commits, which is expected and safe.
+
+## Post-Rebase Verification Checklist
+
+After every rebase, verify BEFORE pushing:
+
+1. **Commit count**: `git log --oneline <parent>..<branch> | wc -l` — does it
+   match expectations? If a branch that had N unique commits now shows 0 or only
+   has parent-chain commits, the rebase was wrong.
+
+2. **Content diff**: `git diff <parent>..<branch> --stat` — does it show the
+   expected file changes? If the branch looks identical to its parent, unique
+   commits were silently lost.
+
+3. **No silent drops**: Check the rebase output for "dropping ... patch contents
+   already upstream" messages. A few drops are normal (duplicate fixes), but if
+   most or all commits are dropped, the old-base was wrong.
+
+4. **Side branches need original backups**: When propagating to side branches
+   (branches that fork from the chain, not part of the linear sequence), always
+   use the original pre-session backup tag as the source of truth for the
+   old-base — NOT a mid-session branch pointer that may have been modified by
+   earlier rebases or fix commits during the same session.
