@@ -116,27 +116,27 @@ When rebasing branches that are checked out in other worktrees:
 
 ## GitHub PRs
 
-**Always prefer `ghpr` over raw `gh api` calls** for PR operations. `ghpr`
-handles authentication and formatting automatically, avoiding permissions
-issues that `gh api` can encounter. Only fall back to `gh api` when you need
-data that `ghpr` doesn't expose (e.g., specific API fields, programmatic JSON
-parsing).
+**Prefer the `ghpr` MCP server tools** for PR operations (registered via
+`~/dotfiles/setup_mcp.sh`). They return structured data that's easier to
+reason about than parsed shell output:
 
-`ghpr` is loaded into the shell profile automatically — call it directly:
+- `ghpr_info(pr)` — title, state, base/head branches, author, URL, body
+- `ghpr_comments(pr, kind="all"|"inline"|"review"|"general")` — filterable by kind
+- `ghpr_diff(pr)` — unified diff
+- `ghpr_files(pr)` — changed files with per-file stats
+- `ghpr_checks(pr)` — CI check rollup
+
+If the MCP server isn't available, fall back to the `ghpr` shell function
+(same surface, prints text). Use `gh api` only as a last resort — `ghpr` and
+the MCP server handle auth more reliably and are terser.
 
 ```bash
+# Shell fallback — equivalent commands
 ghpr comments <PR_NUMBER>
+ghpr info <PR_NUMBER>
 ```
 
-Available commands:
-
-- `ghpr comments <pr>` — Show all comments (inline review, review summaries, general)
-- `ghpr diff <pr>` — Show the PR diff
-- `ghpr files <pr>` — List changed files
-- `ghpr info <pr>` — Show PR title, state, base branch, and description
-- `ghpr checks <pr>` — Show CI check status
-
-Use `ghpr comments` when addressing PR review feedback, and `ghpr info` to
+Use comment fetching when addressing PR review feedback, and info to
 understand a PR's purpose before making changes.
 
 ## Shell Commands

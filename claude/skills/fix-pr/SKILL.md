@@ -26,16 +26,19 @@ gh pr view <number> --json number,title,headRefName,baseRefName,state
 
 ### 2. Gather Review Comments
 
-Fetch all review comments from the PR using `ghpr` (preferred over `gh api`
-for reliability and auth handling):
+Prefer the **`ghpr` MCP tools** (from the `ghpr` MCP server, registered via
+`setup_mcp.sh`) over shelling out to `gh api`. They return structured data
+that's easier to reason about and filter:
 
-```bash
-# All comments: inline review, review summaries, and general discussion
-ghpr comments <number>
-```
+- `ghpr_info(pr)` — title, state, base/head branches, author, URL, body
+- `ghpr_comments(pr, kind="all")` — all review comments. Pass
+  `kind="inline"` / `kind="review"` / `kind="general"` to narrow the scope.
+- `ghpr_diff(pr)` — unified diff as a string
+- `ghpr_files(pr)` — changed files with per-file stats
+- `ghpr_checks(pr)` — CI check rollup
 
-Only fall back to `gh api` if you need structured JSON output for programmatic
-processing that `ghpr` doesn't support.
+If the MCP server is unavailable, fall back to the `ghpr` shell function
+(`ghpr comments <number>`) or `gh api` as a last resort.
 
 ### 3. Categorize Comments
 

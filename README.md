@@ -34,6 +34,9 @@ Skills can be invoked in two ways:
 ### Available Skills
 
 - `/rebase-chain` - Help rebase chained feature branches using `git rebase --onto`
+- `/fix-pr` - Address PR review comments and fix CI failures
+- `/review-code` - Review code changes for common issues and test coverage
+- `/tdd-fix` - Fix bugs using test-driven development
 
 ### Manual Setup (if not using setup_claude.sh)
 
@@ -50,6 +53,30 @@ ln -s ~/dotfiles/claude/skills ~/.claude/skills
 
 No additional installation is required - Claude Code automatically discovers skills in `~/.claude/skills/`.
 After symlinking, the skills are immediately available.
+
+## Claude Code MCP Servers
+
+This repo includes MCP (Model Context Protocol) servers in `mcp/` that expose
+typed tools to Claude sessions — a better interface than having Claude parse
+shell output. Skills in this repo prefer MCP tools over shelling out.
+
+### Available Servers
+
+- `ghpr` — GitHub PR helpers (info, comments, diff, files, checks). See
+  [mcp/ghpr/README.md](mcp/ghpr/README.md).
+
+### Setup
+
+```bash
+./setup_mcp.sh
+```
+
+Idempotent: installs dependencies and registers each server with Claude Code
+at user scope. Re-run with `--force` to re-register. Verify with
+`claude mcp list`.
+
+Requires [uv](https://docs.astral.sh/uv/), [`gh`](https://cli.github.com/)
+(authenticated), and the `claude` CLI on PATH.
 
 ## Usage
 
