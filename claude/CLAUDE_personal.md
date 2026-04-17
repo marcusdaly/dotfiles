@@ -113,6 +113,7 @@ When rebasing branches that are checked out in other worktrees:
 ## Python Environment
 
 - When configured in the project, please use `uv` for a python environment and dependency management.
+- Default to `pyright` for type checking unless the project is already configured with a different type checker (e.g., mypy).
 
 ## GitHub PRs
 
