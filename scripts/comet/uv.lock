@@ -119,10 +119,14 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "comet-ml" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "comet-ml", specifier = ">=3.40.0" }]
+requires-dist = [
+    { name = "comet-ml", specifier = ">=3.40.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+]
 
 [[package]]
 name = "comet-ml"
@@ -309,6 +313,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/8b/b4/ae3736cfc3970fe6ee348620780811c016fe4c01d2d0ff4a3a19f4eff5f7/python_box-6.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3f0036f91e13958d2b37d2bc74c1197aa36ffd66755342eb64910f63d8a2990f", size = 3546030, upload-time = "2022-10-29T22:35:05.688Z" },
     { url = "https://files.pythonhosted.org/packages/f3/7d/5cc1f3145792b803ee6debc82d1faf791659baa15c2de7b1d9318adbcd68/python_box-6.1.0-cp311-cp311-win_amd64.whl", hash = "sha256:af6bcee7e1abe9251e9a41ca9ab677e1f679f6059321cfbae7e78a3831e0b736", size = 957417, upload-time = "2022-10-29T22:33:41.542Z" },
     { url = "https://files.pythonhosted.org/packages/88/c6/6d1e368710cb6c458ed692d179d7e101ebce80a3e640b2e74cc7ae886d6f/python_box-6.1.0-py3-none-any.whl", hash = "sha256:bdec0a5f5a17b01fc538d292602a077aa8c641fb121e1900dff0591791af80e8", size = 27277, upload-time = "2022-10-29T22:30:43.645Z" },
+]
+
+[[package]]
+name = "python-dotenv"
+version = "1.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/ed/0301aeeac3e5353ef3d94b6ec08bbcabd04a72018415dcb29e588514bba8/python_dotenv-1.2.2.tar.gz", hash = "sha256:2c371a91fbd7ba082c2c1dc1f8bf89ca22564a087c2c287cd9b662adde799cf3", size = 50135, upload-time = "2026-03-01T16:00:26.196Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/d7/1959b9648791274998a9c3526f6d0ec8fd2233e4d4acce81bbae76b44b2a/python_dotenv-1.2.2-py3-none-any.whl", hash = "sha256:1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a", size = 22101, upload-time = "2026-03-01T16:00:25.09Z" },
 ]
 
 [[package]]

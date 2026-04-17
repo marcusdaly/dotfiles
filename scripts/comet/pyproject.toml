@@ -3,7 +3,10 @@ name = "comet-check"
 version = "0.1.0"
 description = "CLI to query Comet ML experiments"
 requires-python = ">=3.11"
-dependencies = ["comet_ml>=3.40.0"]
+dependencies = [
+    "comet_ml>=3.40.0",
+    "python-dotenv>=1.0.0",
+]
 
 [project.scripts]
 comet-check = "comet_check.cli:main"

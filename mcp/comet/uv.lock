@@ -232,10 +232,14 @@ version = "0.1.0"
 source = { editable = "../../scripts/comet" }
 dependencies = [
     { name = "comet-ml" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "comet-ml", specifier = ">=3.40.0" }]
+requires-dist = [
+    { name = "comet-ml", specifier = ">=3.40.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+]
 
 [[package]]
 name = "comet-mcp"

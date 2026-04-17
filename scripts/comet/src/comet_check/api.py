@@ -6,28 +6,43 @@ the optional `workspace` arg, falling back to `$COMET_WORKSPACE`.
 """
 
 import os
+from pathlib import Path
 
 from comet_ml import API
+from dotenv import dotenv_values
 
 
 class CometConfigError(RuntimeError):
     """Raised when required Comet config (API key, workspace) is missing."""
 
 
+def _from_secrets_env(var_name: str) -> str | None:
+    """Fetch a single var from ~/.secrets.env without polluting os.environ."""
+    secrets_path = Path.home() / ".secrets.env"
+    if not secrets_path.exists():
+        return None
+    return dotenv_values(secrets_path).get(var_name)
+
+
 def _api() -> API:
-    api_key = os.environ.get("COMET_API_KEY")
+    api_key = os.environ.get("COMET_API_KEY") or _from_secrets_env("COMET_API_KEY")
     if not api_key:
         raise CometConfigError(
-            "$COMET_API_KEY is not set. Add it to ~/.secrets.env."
+            "$COMET_API_KEY is not set and was not found in ~/.secrets.env."
         )
     return API(api_key=api_key)
 
 
 def _resolve_workspace(workspace: str | None) -> str:
-    effective = workspace or os.environ.get("COMET_WORKSPACE")
+    effective = (
+        workspace
+        or os.environ.get("COMET_WORKSPACE")
+        or _from_secrets_env("COMET_WORKSPACE")
+    )
     if not effective:
         raise CometConfigError(
-            "No workspace set. Pass workspace=... or export COMET_WORKSPACE."
+            "No workspace set. Pass workspace=..., export COMET_WORKSPACE, "
+            "or add it to ~/.secrets.env."
         )
     return effective
 

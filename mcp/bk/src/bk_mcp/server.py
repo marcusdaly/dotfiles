@@ -13,8 +13,10 @@ Pipeline/org resolution (highest precedence first):
 import os
 import re
 import subprocess
+from pathlib import Path
 
 import requests
+from dotenv import dotenv_values
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("bk")
@@ -32,11 +34,19 @@ class BkApiError(RuntimeError):
     """Raised when the Buildkite API returns a non-success response."""
 
 
+def _from_secrets_env(var_name: str) -> str | None:
+    """Fetch a single var from ~/.secrets.env without polluting os.environ."""
+    secrets_path = Path.home() / ".secrets.env"
+    if not secrets_path.exists():
+        return None
+    return dotenv_values(secrets_path).get(var_name)
+
+
 def _token() -> str:
-    token = os.environ.get(_BK_TOKEN_ENV)
+    token = os.environ.get(_BK_TOKEN_ENV) or _from_secrets_env(_BK_TOKEN_ENV)
     if not token:
         raise BkConfigError(
-            f"${_BK_TOKEN_ENV} is not set. Add it to ~/.secrets.env."
+            f"${_BK_TOKEN_ENV} is not set and was not found in ~/.secrets.env."
         )
     return token
 

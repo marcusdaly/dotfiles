@@ -79,9 +79,28 @@ grant_mcp_permission() {
 }
 
 register_server() {
+    # Usage: register_server <name> <project_dir> <entrypoint> [env_var_name...]
+    #
+    # Any trailing args are treated as names of env vars to forward into the
+    # MCP server's runtime environment at registration time (via
+    # `claude mcp add --env KEY=VALUE`). Vars unset at setup time are
+    # silently skipped — the MCP server will error cleanly at call time if
+    # they're actually needed.
     local name="$1"
     local project_dir="$2"
     local entrypoint="$3"
+    shift 3
+
+    local env_args=()
+    local var_name
+    for var_name in "$@"; do
+        local value="${!var_name:-}"
+        if [[ -n "$value" ]]; then
+            env_args+=("--env" "${var_name}=${value}")
+        else
+            echo "  Note: \$${var_name} is not set; skipping --env passthrough for '$name'."
+        fi
+    done
 
     if claude mcp get "$name" >/dev/null 2>&1; then
         if [[ "$FORCE" -eq 1 ]]; then
@@ -98,8 +117,13 @@ register_server() {
     (cd "$project_dir" && uv sync --quiet)
 
     echo "Registering MCP server '$name' at user scope..."
-    claude mcp add --scope user "$name" -- \
-        uv run --project "$project_dir" "$entrypoint"
+    if [[ ${#env_args[@]} -gt 0 ]]; then
+        claude mcp add --scope user "$name" "${env_args[@]}" -- \
+            uv run --project "$project_dir" "$entrypoint"
+    else
+        claude mcp add --scope user "$name" -- \
+            uv run --project "$project_dir" "$entrypoint"
+    fi
     echo "  Registered: $name -> $project_dir"
 
     grant_mcp_permission "$name"
@@ -109,8 +133,8 @@ echo "Setting up MCP servers from $DOTFILES_DIR/mcp/"
 echo ""
 
 register_server "ghpr" "$DOTFILES_DIR/mcp/ghpr" "ghpr-mcp"
-register_server "bk" "$DOTFILES_DIR/mcp/bk" "bk-mcp"
-register_server "comet" "$DOTFILES_DIR/mcp/comet" "comet-mcp"
+register_server "bk" "$DOTFILES_DIR/mcp/bk" "bk-mcp" BK_PIPELINE BK_ORG
+register_server "comet" "$DOTFILES_DIR/mcp/comet" "comet-mcp" COMET_WORKSPACE
 
 echo ""
 echo "Done. Verify with: claude mcp list"
