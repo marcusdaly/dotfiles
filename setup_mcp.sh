@@ -1,9 +1,14 @@
 #!/bin/bash
 # Idempotent setup for MCP servers in this repo.
 #
-# Registers each server in mcp/<name>/ with Claude Code at user scope so they
-# are available globally. Safe to re-run: servers already registered are
-# skipped (use --force to re-register).
+# For each server in mcp/<name>/:
+#   1. Installs its Python dependencies via `uv sync`
+#   2. Registers it with Claude Code at user scope
+#   3. Allows mcp__<name> in ~/.claude/settings.json so tools from the server
+#      are preapproved in every session
+#
+# Safe to re-run: each step is skipped if already done (use --force to
+# re-register the MCP server; permissions are always re-checked).
 
 set -euo pipefail
 
@@ -13,6 +18,7 @@ if [[ "${1:-}" == "--force" ]]; then
 fi
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SETTINGS_FILE="$HOME/.claude/settings.json"
 
 if ! command -v claude >/dev/null 2>&1; then
     echo "Error: 'claude' CLI not found on PATH. Install Claude Code first." >&2
@@ -23,6 +29,54 @@ if ! command -v uv >/dev/null 2>&1; then
     echo "Error: 'uv' not found on PATH. Install uv first: https://docs.astral.sh/uv/" >&2
     exit 1
 fi
+
+grant_mcp_permission() {
+    local name="$1"
+    local perm="mcp__$name"
+
+    if ! command -v jq >/dev/null 2>&1; then
+        echo "  Warning: 'jq' not found; skipping permission auto-grant." >&2
+        echo "  Add '\"$perm\"' to .permissions.allow in $SETTINGS_FILE manually." >&2
+        return 0
+    fi
+
+    if [[ ! -f "$SETTINGS_FILE" ]]; then
+        echo "  Creating $SETTINGS_FILE with initial permissions."
+        mkdir -p "$(dirname "$SETTINGS_FILE")"
+        echo '{"permissions":{"allow":[]}}' > "$SETTINGS_FILE"
+    fi
+
+    if ! jq empty "$SETTINGS_FILE" 2>/dev/null; then
+        echo "  Error: $SETTINGS_FILE is not valid JSON, refusing to modify." >&2
+        return 1
+    fi
+
+    if jq -e --arg perm "$perm" \
+        '(.permissions.allow // []) | index($perm)' \
+        "$SETTINGS_FILE" >/dev/null; then
+        echo "  Permission '$perm' already allowed."
+        return 0
+    fi
+
+    local backup
+    backup="$SETTINGS_FILE.bak.$(date +%Y%m%d_%H%M%S)"
+    cp "$SETTINGS_FILE" "$backup"
+
+    local tmp
+    tmp=$(mktemp)
+    jq --arg perm "$perm" \
+        '.permissions.allow = ((.permissions.allow // []) + [$perm])' \
+        "$SETTINGS_FILE" > "$tmp"
+
+    if ! jq empty "$tmp" 2>/dev/null; then
+        echo "  Error: generated invalid JSON; keeping original (backup at $backup)." >&2
+        rm -f "$tmp"
+        return 1
+    fi
+
+    mv "$tmp" "$SETTINGS_FILE"
+    echo "  Permission granted: '$perm' (backup: $backup)"
+}
 
 register_server() {
     local name="$1"
@@ -35,6 +89,7 @@ register_server() {
             claude mcp remove "$name" >/dev/null 2>&1 || true
         else
             echo "MCP server '$name' already registered, skipping (use --force to re-register)"
+            grant_mcp_permission "$name"
             return 0
         fi
     fi
@@ -46,6 +101,8 @@ register_server() {
     claude mcp add --scope user "$name" -- \
         uv run --project "$project_dir" "$entrypoint"
     echo "  Registered: $name -> $project_dir"
+
+    grant_mcp_permission "$name"
 }
 
 echo "Setting up MCP servers from $DOTFILES_DIR/mcp/"

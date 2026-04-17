@@ -3,6 +3,9 @@
 Shells out to the `gh` CLI for data access so that existing `gh auth` state
 works with no extra configuration. Returns structured data (not prose) so
 Claude can filter and reason about it without parsing log output.
+
+Every tool accepts an optional `repo` argument in `owner/name` form. When
+omitted, `gh` falls back to the repo associated with the current directory.
 """
 
 import json
@@ -38,21 +41,42 @@ def _gh_json(args: list[str]) -> object:
     return json.loads(_run_gh(args))
 
 
+def _pr_view_args(pr: int, repo: str | None, json_fields: str) -> list[str]:
+    """Build args for `gh pr view`, including optional --repo override."""
+    args = ["pr", "view", str(pr)]
+    if repo:
+        args.extend(["--repo", repo])
+    args.extend(["--json", json_fields])
+    return args
+
+
+def _api_repo_prefix(repo: str | None) -> str:
+    """Return the `repos/<owner>/<repo>` prefix for `gh api` calls.
+
+    When `repo` is None, uses gh's placeholder syntax so the current repo is
+    resolved from the working directory.
+    """
+    return f"repos/{repo}" if repo else "repos/{owner}/{repo}"
+
+
 @mcp.tool()
-def ghpr_info(pr: int) -> dict:
+def ghpr_info(pr: int, repo: str | None = None) -> dict:
     """Return title, state, base/head branches, author, URL, and body for a PR.
 
     Args:
         pr: The pull request number.
+        repo: Optional `owner/name` to target a specific repo. Defaults to
+            the repo of the current working directory.
     """
     fields = "number,title,state,baseRefName,headRefName,author,url,body,isDraft"
-    return _gh_json(["pr", "view", str(pr), "--json", fields])  # type: ignore[return-value]
+    return _gh_json(_pr_view_args(pr, repo, fields))  # type: ignore[return-value]
 
 
 @mcp.tool()
 def ghpr_comments(
     pr: int,
     kind: Literal["all", "inline", "review", "general"] = "all",
+    repo: str | None = None,
 ) -> list[dict]:
     """Return comments on a PR, optionally filtered by kind.
 
@@ -63,12 +87,13 @@ def ghpr_comments(
     Args:
         pr: The pull request number.
         kind: Which category of comments to return.
+        repo: Optional `owner/name` to target a specific repo.
     """
-    repo_ref = "repos/{owner}/{repo}"
+    prefix = _api_repo_prefix(repo)
     collected: list[dict] = []
 
     if kind in ("all", "inline"):
-        inline = _gh_json(["api", f"{repo_ref}/pulls/{pr}/comments"])
+        inline = _gh_json(["api", f"{prefix}/pulls/{pr}/comments"])
         assert isinstance(inline, list)
         for comment in inline:
             collected.append(
@@ -83,7 +108,7 @@ def ghpr_comments(
             )
 
     if kind in ("all", "review"):
-        reviews = _gh_json(["api", f"{repo_ref}/pulls/{pr}/reviews"])
+        reviews = _gh_json(["api", f"{prefix}/pulls/{pr}/reviews"])
         assert isinstance(reviews, list)
         for review in reviews:
             if not review.get("body"):
@@ -99,7 +124,7 @@ def ghpr_comments(
             )
 
     if kind in ("all", "general"):
-        issues = _gh_json(["api", f"{repo_ref}/issues/{pr}/comments"])
+        issues = _gh_json(["api", f"{prefix}/issues/{pr}/comments"])
         assert isinstance(issues, list)
         for comment in issues:
             collected.append(
@@ -115,37 +140,41 @@ def ghpr_comments(
 
 
 @mcp.tool()
-def ghpr_diff(pr: int) -> str:
+def ghpr_diff(pr: int, repo: str | None = None) -> str:
     """Return the unified diff for a PR as a single string.
 
     Args:
         pr: The pull request number.
+        repo: Optional `owner/name` to target a specific repo.
     """
-    return _run_gh(["pr", "diff", str(pr)])
+    args = ["pr", "diff", str(pr)]
+    if repo:
+        args.extend(["--repo", repo])
+    return _run_gh(args)
 
 
 @mcp.tool()
-def ghpr_files(pr: int) -> list[dict]:
+def ghpr_files(pr: int, repo: str | None = None) -> list[dict]:
     """Return the list of files changed in a PR with per-file stats.
 
     Args:
         pr: The pull request number.
+        repo: Optional `owner/name` to target a specific repo.
     """
-    result = _gh_json(["pr", "view", str(pr), "--json", "files"])
+    result = _gh_json(_pr_view_args(pr, repo, "files"))
     assert isinstance(result, dict)
     return result.get("files", [])
 
 
 @mcp.tool()
-def ghpr_checks(pr: int) -> list[dict]:
+def ghpr_checks(pr: int, repo: str | None = None) -> list[dict]:
     """Return CI check status for a PR.
 
     Args:
         pr: The pull request number.
+        repo: Optional `owner/name` to target a specific repo.
     """
-    result = _gh_json(
-        ["pr", "view", str(pr), "--json", "statusCheckRollup"]
-    )
+    result = _gh_json(_pr_view_args(pr, repo, "statusCheckRollup"))
     assert isinstance(result, dict)
     return result.get("statusCheckRollup", [])
 
