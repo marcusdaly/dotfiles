@@ -1,1 +1,18 @@
 zsh_config/zsh_custom/plugins/zsh-syntax-highlighting
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Claude Code local settings (per-machine permissions, not shared)
+.claude/settings.local.json
+
+# Skills: allowlist only the public-facing skills in this repo.
+# Symlinked skills (typically pointing to ~/dotfiles-etsy or worktrees) should
+# stay untracked. To add a new public skill, add an exception below.
+claude/skills/*
+!claude/skills/fix-pr
+!claude/skills/rebase-chain
+!claude/skills/review-code
+!claude/skills/tdd-fix
