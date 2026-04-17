@@ -146,7 +146,18 @@ understand a PR's purpose before making changes.
 
 ## Comet ML
 
-Monitor training experiments from the terminal using the `comet` alias:
+**Prefer the `comet` MCP server tools** for querying Comet ML experiments
+(registered via `~/dotfiles/setup_mcp.sh`). They return structured data
+that's easier to reason about than parsed shell output:
+
+- `comet_list(project, workspace?, limit?)` — recent experiments with loss
+- `comet_metrics(experiment_key, metric_names?)` — latest values per metric
+- `comet_compare(key1, key2, metric?)` — side-by-side metric comparison
+- `comet_text(experiment_key, limit?)` — recent logged text (generations)
+- `comet_url(experiment_key)` — Comet UI URL
+
+The `comet` shell alias (in `~/dotfiles/zsh_config/.zshrc`) remains for
+manual terminal use:
 
 ```bash
 comet list <project>                    # List recent experiments with loss
@@ -156,7 +167,9 @@ comet compare <key1> <key2> [metric]    # Compare experiments
 comet url <experiment_key>              # Print experiment URL
 ```
 
-The `comet` alias loads API key from `~/.secrets.env` and runs via uv.
+Both interfaces share the same `comet_check.api` library. Requires
+`$COMET_API_KEY` and `$COMET_WORKSPACE` in the environment (loaded from
+`~/.secrets.env`).
 Requires `COMET_API_KEY` and `COMET_WORKSPACE` env vars in `~/.secrets.env`.
 
 ## Plan Mode

@@ -110,6 +110,7 @@ echo ""
 
 register_server "ghpr" "$DOTFILES_DIR/mcp/ghpr" "ghpr-mcp"
 register_server "bk" "$DOTFILES_DIR/mcp/bk" "bk-mcp"
+register_server "comet" "$DOTFILES_DIR/mcp/comet" "comet-mcp"
 
 echo ""
 echo "Done. Verify with: claude mcp list"
