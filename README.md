@@ -37,6 +37,7 @@ Skills can be invoked in two ways:
 - `/fix-pr` - Address PR review comments and fix CI failures
 - `/review-code` - Review code changes for common issues and test coverage
 - `/tdd-fix` - Fix bugs using test-driven development
+- `/bk-ci` - Check Buildkite CI status and extract failure details (requires `BUILDKITE_API_TOKEN` in `~/.secrets.env` and `$BK_PIPELINE` / `$BK_ORG` set)
 
 ### Manual Setup (if not using setup_claude.sh)
 

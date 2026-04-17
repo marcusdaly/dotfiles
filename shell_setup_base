@@ -25,3 +25,4 @@ alias auth="gcloud auth login --update-adc"
 
 # CLI helper functions
 source ~/dotfiles/scripts/ghpr.sh
+source ~/dotfiles/scripts/bk.sh

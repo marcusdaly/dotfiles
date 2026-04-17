@@ -12,6 +12,7 @@ __pycache__/
 # Symlinked skills (typically pointing to ~/dotfiles-etsy or worktrees) should
 # stay untracked. To add a new public skill, add an exception below.
 claude/skills/*
+!claude/skills/bk-ci
 !claude/skills/fix-pr
 !claude/skills/rebase-chain
 !claude/skills/review-code
