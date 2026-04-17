@@ -147,6 +147,7 @@ def bk_builds(
 @mcp.tool()
 def bk_pr_build(
     pr: int,
+    repo: str | None = None,
     pipeline: str | None = None,
     org: str | None = None,
 ) -> dict:
@@ -157,12 +158,18 @@ def bk_pr_build(
 
     Args:
         pr: GitHub pull request number.
-        pipeline: Optional pipeline slug; defaults to $BK_PIPELINE.
-        org: Optional organization slug; defaults to $BK_ORG.
+        repo: Optional GitHub repo in `owner/name` form. When omitted, `gh`
+            uses the repo of the current working directory.
+        pipeline: Optional Buildkite pipeline slug; defaults to $BK_PIPELINE.
+        org: Optional Buildkite organization slug; defaults to $BK_ORG.
     """
     effective_pipeline, effective_org = _resolve(pipeline, org)
+    gh_args = ["gh", "pr", "view", str(pr)]
+    if repo:
+        gh_args.extend(["--repo", repo])
+    gh_args.extend(["--json", "headRefName", "-q", ".headRefName"])
     result = subprocess.run(
-        ["gh", "pr", "view", str(pr), "--json", "headRefName", "-q", ".headRefName"],
+        gh_args,
         capture_output=True,
         text=True,
         check=False,
