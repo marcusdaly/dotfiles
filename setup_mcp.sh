@@ -109,6 +109,7 @@ echo "Setting up MCP servers from $DOTFILES_DIR/mcp/"
 echo ""
 
 register_server "ghpr" "$DOTFILES_DIR/mcp/ghpr" "ghpr-mcp"
+register_server "bk" "$DOTFILES_DIR/mcp/bk" "bk-mcp"
 
 echo ""
 echo "Done. Verify with: claude mcp list"
