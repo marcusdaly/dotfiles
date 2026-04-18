@@ -7,15 +7,18 @@ CLI so it inherits your existing `gh auth` state.
 
 | Tool | Purpose |
 | ------ | --------- |
+| `ghpr_list` | List PRs filtered by state, branch, author, label, or search query |
 | `ghpr_info` | Title, state, base/head, author, URL, body |
 | `ghpr_comments` | All comments, filterable by kind (`inline` / `review` / `general` / `all`) |
 | `ghpr_diff` | Unified diff as a string |
 | `ghpr_files` | Changed files with per-file stats |
 | `ghpr_checks` | CI check rollup |
 
-All tools take `pr: int` and an optional `repo: str` in `owner/name` form.
+Most tools take `pr: int` and an optional `repo: str` in `owner/name` form.
 When `repo` is omitted, `gh` uses the repo of the current working directory.
-`ghpr_comments` also takes an optional `kind` filter.
+`ghpr_list` takes optional filters (`state`, `head`, `base`, `author`, `label`,
+`search`, `limit`) instead of a PR number. `ghpr_comments` also takes an
+optional `kind` filter.
 
 ## Prerequisites
 

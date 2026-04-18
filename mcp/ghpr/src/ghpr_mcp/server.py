@@ -60,6 +60,51 @@ def _api_repo_prefix(repo: str | None) -> str:
 
 
 @mcp.tool()
+def ghpr_list(
+    state: Literal["open", "closed", "merged", "all"] = "open",
+    head: str | None = None,
+    base: str | None = None,
+    author: str | None = None,
+    label: str | None = None,
+    search: str | None = None,
+    limit: int = 20,
+    repo: str | None = None,
+) -> list[dict]:
+    """List pull requests, optionally filtered by state, branch, author, or label.
+
+    Args:
+        state: PR state filter. Defaults to "open".
+        head: Filter by head (source) branch name.
+        base: Filter by base (target) branch name.
+        author: Filter by author username.
+        label: Filter by label name.
+        search: Free-text search query (GitHub search syntax).
+        limit: Maximum number of PRs to return (default 20, max 100).
+        repo: Optional `owner/name` to target a specific repo.
+    """
+    args = ["pr", "list", "--state", state, "--limit", str(min(limit, 100))]
+    if head:
+        args.extend(["--head", head])
+    if base:
+        args.extend(["--base", base])
+    if author:
+        args.extend(["--author", author])
+    if label:
+        args.extend(["--label", label])
+    if search:
+        args.extend(["--search", search])
+    if repo:
+        args.extend(["--repo", repo])
+    args.extend(
+        [
+            "--json",
+            "number,title,state,baseRefName,headRefName,author,url,isDraft,createdAt,updatedAt,labels",
+        ]
+    )
+    return _gh_json(args)  # type: ignore[return-value]
+
+
+@mcp.tool()
 def ghpr_info(pr: int, repo: str | None = None) -> dict:
     """Return title, state, base/head branches, author, URL, and body for a PR.
 

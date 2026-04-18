@@ -1,7 +1,7 @@
 [project]
 name = "ghpr-mcp"
 version = "0.1.0"
-description = "MCP server exposing GitHub PR helpers (info/comments/diff/files/checks) as typed tools."
+description = "MCP server exposing GitHub PR helpers (list/info/comments/diff/files/checks) as typed tools."
 requires-python = ">=3.11"
 dependencies = ["mcp>=1.2.0"]
 

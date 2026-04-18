@@ -8,6 +8,7 @@
 #   ghpr files <pr>              List files changed in a PR
 #   ghpr info <pr>               Show PR title, state, base, head, and body
 #   ghpr checks <pr>             Show CI check status
+#   ghpr list [state]            List PRs (default: open)
 
 ghpr() {
     local cmd="${1:-help}"
@@ -48,6 +49,11 @@ ghpr() {
             gh pr checks "$pr_number"
             ;;
 
+        list)
+            local state="${1:-open}"
+            gh pr list --state "$state"
+            ;;
+
         help|*)
             echo "ghpr - GitHub PR helper"
             echo ""
@@ -57,6 +63,7 @@ ghpr() {
             echo "  ghpr files <pr>       List changed files"
             echo "  ghpr info <pr>        Show PR metadata and description"
             echo "  ghpr checks <pr>      Show CI check status"
+            echo "  ghpr list [state]     List PRs (default: open)"
             ;;
     esac
 }
