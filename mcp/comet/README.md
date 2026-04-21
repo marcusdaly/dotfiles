@@ -10,8 +10,12 @@ over the `comet_check.api` library in `~/dotfiles/scripts/comet/`.
 | `comet_projects` | List project names in a workspace (useful for discovery) |
 | `comet_list` | Recent experiments in a project (with latest train_loss) |
 | `comet_metrics` | Latest value for each requested metric |
+| `comet_metric_history` | Full step-by-step trajectory of a metric (for plotting / overfit diagnosis) |
+| `comet_params` | Hyperparameters logged to an experiment |
 | `comet_compare` | Side-by-side metric comparison of two experiments |
 | `comet_text` | Recent logged text entries (e.g., qualitative generations) |
+| `comet_assets` | List assets (plots, images, artifacts) on an experiment |
+| `comet_download_asset` | Download an asset to the local filesystem (restricted to `/tmp`) |
 | `comet_url` | Comet UI URL for an experiment |
 
 `comet_list` takes an optional `workspace` argument. When omitted, it falls

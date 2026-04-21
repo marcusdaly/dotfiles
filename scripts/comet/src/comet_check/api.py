@@ -187,3 +187,191 @@ def get_url(experiment_key: str) -> str:
     api = _api()
     experiment = api.get_experiment_by_key(experiment_key)
     return experiment.url
+
+
+def get_metric_history(
+    experiment_key: str,
+    metric_name: str,
+) -> dict:
+    """Return the full step-by-step trajectory of a metric on an experiment.
+
+    Unlike `get_metrics`, which only returns the final value, this returns
+    every logged point. Useful for plotting a metric over steps/epochs (e.g.,
+    diagnosing the overfit-onset epoch from train_loss vs val_loss).
+
+    Args:
+        experiment_key: Comet experiment key.
+        metric_name: Metric name (e.g., "train_loss", "val_loss").
+
+    Returns:
+        Dict with experiment identity and a `points` list. Each point has
+        `step`, `epoch`, `value`, and `timestamp` (ms since epoch, as
+        returned by Comet).
+    """
+    api = _api()
+    experiment = api.get_experiment_by_key(experiment_key)
+    raw_points = experiment.get_metrics(metric_name) or []
+
+    points: list[dict] = []
+    for point in raw_points:
+        points.append(
+            {
+                "step": point.get("step"),
+                "epoch": point.get("epoch"),
+                "value": float(point["metricValue"]),
+                "timestamp": point.get("timestamp"),
+            }
+        )
+
+    return {
+        "key": experiment_key,
+        "name": experiment.name,
+        "url": experiment.url,
+        "metric": metric_name,
+        "points": points,
+    }
+
+
+def get_params(experiment_key: str) -> dict:
+    """Return the hyperparameters logged for an experiment.
+
+    Useful for verifying what config a run actually used (as opposed to what
+    the code said) — e.g. isolating the effect of a single HP change.
+
+    Args:
+        experiment_key: Comet experiment key.
+
+    Returns:
+        Dict with experiment identity and a `params` mapping of
+        `{name: value}` for every logged parameter. Values are returned as
+        strings (Comet stores them that way).
+    """
+    api = _api()
+    experiment = api.get_experiment_by_key(experiment_key)
+    summary = experiment.get_parameters_summary() or []
+
+    params: dict[str, str] = {}
+    for entry in summary:
+        name = entry.get("name")
+        if name is None:
+            continue
+        params[name] = entry.get("valueCurrent", entry.get("valueMax"))
+
+    return {
+        "key": experiment_key,
+        "name": experiment.name,
+        "url": experiment.url,
+        "params": params,
+    }
+
+
+def list_assets(
+    experiment_key: str,
+    asset_type: str = "all",
+) -> dict:
+    """List assets logged to an experiment (plots, images, artifacts, etc.).
+
+    Args:
+        experiment_key: Comet experiment key.
+        asset_type: Filter by Comet asset type. Defaults to "all". Common
+            values include "image", "model-element", "notebook", "source_code".
+
+    Returns:
+        Dict with experiment identity and an `assets` list. Each asset has
+        `assetId`, `fileName`, `type`, `step`, `fileSize`, and `link`.
+    """
+    api = _api()
+    experiment = api.get_experiment_by_key(experiment_key)
+    raw_assets = experiment.get_asset_list(asset_type=asset_type) or []
+
+    assets: list[dict] = []
+    for asset in raw_assets:
+        assets.append(
+            {
+                "assetId": asset.get("assetId"),
+                "fileName": asset.get("fileName"),
+                "type": asset.get("type"),
+                "step": asset.get("step"),
+                "fileSize": asset.get("fileSize"),
+                "link": asset.get("link"),
+            }
+        )
+
+    return {
+        "key": experiment_key,
+        "name": experiment.name,
+        "url": experiment.url,
+        "asset_type": asset_type,
+        "assets": assets,
+    }
+
+
+_ASSET_DOWNLOAD_ROOT = Path("/tmp/comet_assets")
+
+
+def download_asset(
+    experiment_key: str,
+    asset_name: str,
+    output_dir: str | None = None,
+) -> dict:
+    """Download an asset from an experiment to the local filesystem.
+
+    Resolves the asset by filename (first match wins) and writes the bytes
+    to `output_dir`. Caller can then read/open the file (e.g., view a PNG).
+
+    For safety, `output_dir` is constrained to `/tmp`: any path that does
+    not resolve under `/tmp` raises `ValueError`. The default puts each
+    experiment's assets in its own subdirectory.
+
+    Args:
+        experiment_key: Comet experiment key.
+        asset_name: Filename of the asset as shown in `list_assets` (e.g.,
+            "reliability_diagram.png").
+        output_dir: Directory to write the file into. Must resolve to a
+            path under `/tmp`. Defaults to
+            `/tmp/comet_assets/<experiment_key>/`.
+
+    Returns:
+        Dict with the resolved `assetId`, `fileName`, `path` (absolute path
+        to the downloaded file), and `fileSize` in bytes.
+
+    Raises:
+        ValueError: If the asset does not exist on the experiment, or if
+            `output_dir` resolves to a location outside of `/tmp`.
+    """
+    api = _api()
+    experiment = api.get_experiment_by_key(experiment_key)
+    raw_assets = experiment.get_asset_list(asset_type="all") or []
+
+    match = next(
+        (asset for asset in raw_assets if asset.get("fileName") == asset_name),
+        None,
+    )
+    if match is None:
+        available = [asset.get("fileName") for asset in raw_assets]
+        raise ValueError(
+            f"Asset '{asset_name}' not found on experiment {experiment_key}. "
+            f"Available assets: {available}"
+        )
+
+    requested_dir = Path(output_dir) if output_dir else _ASSET_DOWNLOAD_ROOT / experiment_key
+    resolved_dir = requested_dir.resolve()
+    tmp_root = Path("/tmp").resolve()
+    if tmp_root not in resolved_dir.parents and resolved_dir != tmp_root:
+        raise ValueError(
+            f"output_dir must resolve under /tmp for safety; got '{resolved_dir}'."
+        )
+
+    resolved_dir.mkdir(parents=True, exist_ok=True)
+    destination = resolved_dir / asset_name
+
+    asset_bytes = experiment.get_asset(match["assetId"], return_type="binary")
+    destination.write_bytes(asset_bytes)
+
+    return {
+        "key": experiment_key,
+        "assetId": match["assetId"],
+        "fileName": asset_name,
+        "path": str(destination),
+        "fileSize": len(asset_bytes),
+    }

@@ -90,6 +90,70 @@ def comet_url(experiment_key: str) -> str:
     return api.get_url(experiment_key)
 
 
+@mcp.tool()
+def comet_metric_history(experiment_key: str, metric_name: str) -> dict:
+    """Return the full step-by-step trajectory (step -> value) of a metric.
+
+    Unlike `comet_metrics`, which only returns the final value, this returns
+    every logged point. Useful for diagnosing training dynamics such as the
+    overfit-onset epoch (e.g., train_loss vs val_loss over steps).
+
+    Args:
+        experiment_key: Comet experiment key.
+        metric_name: Metric name (e.g., "train_loss", "val_loss").
+    """
+    return api.get_metric_history(experiment_key, metric_name)
+
+
+@mcp.tool()
+def comet_params(experiment_key: str) -> dict:
+    """Return the hyperparameters logged for an experiment.
+
+    Useful for verifying what config a run actually used (as opposed to
+    what the code said) — e.g. isolating the effect of a single HP change.
+
+    Args:
+        experiment_key: Comet experiment key.
+    """
+    return api.get_params(experiment_key)
+
+
+@mcp.tool()
+def comet_assets(experiment_key: str, asset_type: str = "all") -> dict:
+    """List assets logged to an experiment (plots, images, artifacts).
+
+    Args:
+        experiment_key: Comet experiment key.
+        asset_type: Filter by Comet asset type. Defaults to "all". Common
+            values include "image", "model-element", "notebook", "source_code".
+    """
+    return api.list_assets(experiment_key, asset_type=asset_type)
+
+
+@mcp.tool()
+def comet_download_asset(
+    experiment_key: str,
+    asset_name: str,
+    output_dir: str | None = None,
+) -> dict:
+    """Download an asset from an experiment to the local filesystem.
+
+    Returns the absolute path on disk so the file can then be opened/read
+    (e.g., viewing a reliability_diagram.png as an image).
+
+    For safety, `output_dir` must resolve under `/tmp`; any other path
+    raises ValueError.
+
+    Args:
+        experiment_key: Comet experiment key.
+        asset_name: Filename of the asset as shown in `comet_assets`
+            (e.g., "reliability_diagram.png").
+        output_dir: Directory to write the file into. Must be under `/tmp`.
+            Defaults to `/tmp/comet_assets/<experiment_key>/`.
+    """
+    return api.download_asset(experiment_key, asset_name, output_dir=output_dir)
+
+
 def main() -> None:
     mcp.run()
 
