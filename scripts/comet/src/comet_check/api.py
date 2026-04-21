@@ -192,28 +192,52 @@ def get_url(experiment_key: str) -> str:
 def get_metric_history(
     experiment_key: str,
     metric_name: str,
+    limit: int | None = 500,
 ) -> dict:
-    """Return the full step-by-step trajectory of a metric on an experiment.
+    """Return the step-by-step trajectory of a metric on an experiment.
 
     Unlike `get_metrics`, which only returns the final value, this returns
-    every logged point. Useful for plotting a metric over steps/epochs (e.g.,
-    diagnosing the overfit-onset epoch from train_loss vs val_loss).
+    points across the run. Useful for plotting a metric over steps/epochs
+    (e.g., diagnosing the overfit-onset epoch from train_loss vs val_loss).
+
+    Long runs can log tens of thousands of points, which easily exceeds
+    MCP token limits. By default this uniformly subsamples the trajectory
+    to at most `limit` points (first and last always preserved so the
+    overall trend is intact). Pass `limit=None` to get every point.
 
     Args:
         experiment_key: Comet experiment key.
         metric_name: Metric name (e.g., "train_loss", "val_loss").
+        limit: Max points to return. If the raw history is longer, points
+            are subsampled with uniform stride. Defaults to 500. Pass
+            `None` for every point.
 
     Returns:
-        Dict with experiment identity and a `points` list. Each point has
-        `step`, `epoch`, `value`, and `timestamp` (ms since epoch, as
-        returned by Comet).
+        Dict with experiment identity, a `points` list (each with `step`,
+        `epoch`, `value`, `timestamp`), plus `total_points` (how many
+        Comet actually logged) and `stride` (the subsampling stride used;
+        1 means no subsampling).
     """
     api = _api()
     experiment = api.get_experiment_by_key(experiment_key)
     raw_points = experiment.get_metrics(metric_name) or []
 
+    total = len(raw_points)
+    if limit is not None and limit <= 0:
+        raise ValueError(f"limit must be positive or None; got {limit}.")
+
+    if limit is None or total <= limit:
+        stride = 1
+        selected_points = raw_points
+    else:
+        stride = max(1, total // limit)
+        selected_points = raw_points[::stride]
+        # Always include the final point so the trend endpoint is preserved.
+        if selected_points and selected_points[-1] is not raw_points[-1]:
+            selected_points = list(selected_points) + [raw_points[-1]]
+
     points: list[dict] = []
-    for point in raw_points:
+    for point in selected_points:
         points.append(
             {
                 "step": point.get("step"),
@@ -228,6 +252,8 @@ def get_metric_history(
         "name": experiment.name,
         "url": experiment.url,
         "metric": metric_name,
+        "total_points": total,
+        "stride": stride,
         "points": points,
     }
 

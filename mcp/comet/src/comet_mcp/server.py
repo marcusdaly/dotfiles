@@ -91,18 +91,30 @@ def comet_url(experiment_key: str) -> str:
 
 
 @mcp.tool()
-def comet_metric_history(experiment_key: str, metric_name: str) -> dict:
-    """Return the full step-by-step trajectory (step -> value) of a metric.
+def comet_metric_history(
+    experiment_key: str,
+    metric_name: str,
+    limit: int | None = 500,
+) -> dict:
+    """Return the step-by-step trajectory (step -> value) of a metric.
 
     Unlike `comet_metrics`, which only returns the final value, this returns
-    every logged point. Useful for diagnosing training dynamics such as the
-    overfit-onset epoch (e.g., train_loss vs val_loss over steps).
+    points across the run. Useful for diagnosing training dynamics such as
+    the overfit-onset epoch (e.g., train_loss vs val_loss over steps).
+
+    Long runs can log tens of thousands of points, which easily exceeds
+    MCP token limits. By default this uniformly subsamples to at most
+    `limit` points (first and last always preserved). The response
+    includes `total_points` and `stride` so the caller knows what was
+    dropped. Pass `limit=null` to get every point.
 
     Args:
         experiment_key: Comet experiment key.
         metric_name: Metric name (e.g., "train_loss", "val_loss").
+        limit: Max points to return. Defaults to 500. Pass null for every
+            point.
     """
-    return api.get_metric_history(experiment_key, metric_name)
+    return api.get_metric_history(experiment_key, metric_name, limit=limit)
 
 
 @mcp.tool()
